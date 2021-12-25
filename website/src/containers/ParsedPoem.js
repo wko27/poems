@@ -1,6 +1,6 @@
-import { withStyles } from '@material-ui/core/styles';
+import { css } from '@emotion/react';
 
-import Typography from '@material-ui/core/Typography';
+import Typography from '@mui/material/Typography';
 
 const PLAIN = "PLAIN";
 const HIGHLIGHTED = "HIGHLIGHTED";
@@ -90,7 +90,7 @@ const parseStructure = (content, sections) => {
 
 const TextPart = (props) => {
   const {
-    className,
+    css,
     text,
     lineIdx,
     lineOffset,
@@ -125,7 +125,7 @@ const TextPart = (props) => {
 
   return (
     <Typography
-      className={className}
+      css={css}
       variant="h6"
       component="span"
       onClick={onSelect}
@@ -137,7 +137,6 @@ const TextPart = (props) => {
 
 const ParsedPoem = (props) => {
   const {
-    classes,
     content,
     annotation,
   } = props;
@@ -171,7 +170,6 @@ const ParsedPoem = (props) => {
             lineElements.push(
               <TextPart
                 key={lineElements.length}
-                className={classes.plain}
                 lineIdx={lineIdx}
                 lineOffset={lineOffset}
                 text={text}
@@ -183,7 +181,10 @@ const ParsedPoem = (props) => {
             lineElements.push(
               <TextPart
                 key={lineElements.length}
-                className={classes.highlighted}
+                css={(theme) => css`
+                  textDecoration: 'underline',
+                  backgroundColor: theme.palette.info.light,
+                `}
                 lineIdx={lineIdx}
                 lineOffset={lineOffset}
                 text={text}
@@ -196,9 +197,17 @@ const ParsedPoem = (props) => {
         }
       }
 
-      const lineClassname = isFirstLineOfStanza ? "stanzaStart" : "line";
+      const css = isFirstLineOfStanza
+        ? (theme) => css`
+          marginTop: theme.spacing(4),
+          marginBottom: theme.spacing(0.5),
+        `
+        : (theme) => css`
+          marginTop: theme.spacing(0.5),
+          marginBottom: theme.spacing(0.5),
+        `;
       elements.push((
-        <p key={elements.length} className={classes[lineClassname]}>
+        <p key={elements.length} css={css}>
           {lineElements}
         </p>
       ));
@@ -211,14 +220,6 @@ const ParsedPoem = (props) => {
 }
 
 const styles = (theme) => ({
-  stanzaStart: {
-    marginTop: theme.spacing(4),
-    marginBottom: theme.spacing(0.5),
-  },
-  line: {
-    marginTop: theme.spacing(0.5),
-    marginBottom: theme.spacing(0.5),
-  },
   plain: {
   },
   highlighted: {
@@ -227,4 +228,5 @@ const styles = (theme) => ({
   },
 });
 
-export default withStyles(styles)(ParsedPoem);
+export default ParsedPoem;
+

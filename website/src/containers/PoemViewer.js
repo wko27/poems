@@ -1,18 +1,65 @@
 import React, { useState } from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import styled from '@emotion/styled';
 
-import Link from '@material-ui/core/Link';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
+import Link from '@mui/material/Link';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
 
 import ButtonControl from '../components/ButtonControl';
 import ParsedPoem from './ParsedPoem';
 
-const DescriptionContainer = (props) => {
+const flexColumnCentered = `
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Root = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: flex-start;
+  width: 100%;
+`;
+
+const Title = styled.div`
+  ${flexColumnCentered};
+`;
+
+const DescriptionContainer = styled.div`
+  ${flexColumnCentered};
+  top: 15vh;
+  position: sticky;
+  max-width: 20vw;
+`;
+
+const DescriptionSection = styled.div(
+  ({ theme }) => `
+    ${flexColumnCentered};
+    padding: ${theme.spacing(1)};
+  `
+);
+
+const DescriptionSectionHeader = styled.div(
+  ({ theme }) => `
+    margin-bottom: ${theme.spacing(1)};
+  `
+);
+
+const DescriptionSectionContent = styled(Paper)(
+  ({ theme }) => `
+    ${flexColumnCentered};
+    padding: ${theme.spacing(1)};
+  `
+);
+
+const Description = (props) => {
   const {
-    classes,
+    title,
     author,
+    dedicatedTo,
     created,
     meter,
     type,
@@ -21,16 +68,22 @@ const DescriptionContainer = (props) => {
   } = props;
 
   return (
-    <div className={classes.descriptionContainer}>
-      <div className={classes.containerWrapper}>
-        <div className={classes.subcontainerHeader}>
+    <DescriptionContainer>
+      <DescriptionSection>
+        <DescriptionSectionHeader>
           <Typography variant='h4'>
             Details
           </Typography>
-        </div>
-        <Paper className={classes.subcontainer} variant='outlined'>
+        </DescriptionSectionHeader>
+        <DescriptionSectionContent variant='outlined'>
+          <Typography variant='body1'>
+            {`Title: ${title}`}
+          </Typography>
           <Typography variant='body1'>
             {`Author: ${author}`}
+          </Typography>
+          <Typography variant='body1'>
+            {`Dedicated To: ${dedicatedTo}`}
           </Typography>
           <Typography variant='body1'>
             {`Written: ${created}`}
@@ -41,32 +94,32 @@ const DescriptionContainer = (props) => {
           <Typography variant='body1'>
             {`Type: ${type}`}
           </Typography>
-        </Paper>
-      </div>
+        </DescriptionSectionContent>
+      </DescriptionSection>
       
       
-      <div className={classes.containerWrapper}>
-        <div className={classes.subcontainerHeader}>
+      <DescriptionSection>
+        <DescriptionSectionHeader>
           <Typography variant='h4'>
             Dedication
           </Typography>
-        </div>
-        <Paper className={classes.subcontainer} variant='outlined'>
+        </DescriptionSectionHeader>
+        <DescriptionSectionContent variant='outlined'>
           <Typography variant='body1'>
             {context}
           </Typography>
-        </Paper>
-      </div>
+        </DescriptionSectionContent>
+      </DescriptionSection>
 
       {
         links.length === 0 ? null : (
-          <div className={classes.containerWrapper}>
-            <div className={classes.subcontainerHeader}>
+          <DescriptionSection>
+            <DescriptionSectionHeader>
               <Typography variant='h4'>
                 Links
               </Typography>
-            </div>
-            <Paper className={classes.subcontainer} variant='outlined'>
+            </DescriptionSectionHeader>
+            <DescriptionSectionContent variant='outlined'>
               {
                 links.map((link, idx) => {
                   const {
@@ -81,17 +134,24 @@ const DescriptionContainer = (props) => {
                   );
                 })
               }
-            </Paper>
-          </div>
+            </DescriptionSectionContent>
+          </DescriptionSection>
         )
       }
-    </div>
+    </DescriptionContainer>
   );
 }
 
+const AnnotationContainer = styled.div`
+  ${flexColumnCentered};
+  width: 20vw;
+  top: 20vh;
+  position: sticky;
+  align-self: flex-start;
+`;
+
 const PoemViewer = (props) => {
   const {
-    classes,
     title,
     content,
     annotations = [],
@@ -102,31 +162,30 @@ const PoemViewer = (props) => {
   const annotation = selectedAnnotationIdx == null ? null : annotations[selectedAnnotationIdx];
 
   const annotationDisplay = (
-    <div className={classes.annotationContainer}>
+    <AnnotationContainer>
       <Typography variant='h4'>
         Notes
       </Typography>
       <ButtonControl
-        classes={classes}
         onForward={() => setSelectedAnnotationIdx(selectedAnnotationIdx + 1)}
         disableForward={selectedAnnotationIdx >= annotations.length - 1}
         onBack={() => setSelectedAnnotationIdx(selectedAnnotationIdx - 1)}
         disableBack={selectedAnnotationIdx <= 0}
       />
-      <Paper className={classes.annotationExplanationContainer} variant='outlined'>
+      <DescriptionSectionContent variant='outlined'>
         <Typography variant='body1'>
           {annotation == null ? null : annotation.explanation}
         </Typography>
-      </Paper>
-    </div>
+      </DescriptionSectionContent>
+    </AnnotationContainer>
   );
 
   return (
-    <div className={classes.container}>
-      <DescriptionContainer
+    <Root>
+      <Description
         {...props}
       />
-      <div className={classes.poemContainer}>
+      <Title>
         <Typography variant='h1'>
           {title}
         </Typography>
@@ -134,67 +193,10 @@ const PoemViewer = (props) => {
           content={content}
           annotation={annotation}
         />
-      </div>
+      </Title>
       {annotationDisplay}
-    </div>
+    </Root>
   );
 };
 
-const styles = (theme) => ({
-  container: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'flex-start',
-    width: '100%',
-  },
-  poemContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  descriptionContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    top: '15vh',
-    position: 'sticky',
-    maxWidth: '20vw',
-  },
-  annotationContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '20vw',
-    top: '20vh',
-    position: 'sticky',
-    alignSelf: 'flex-start',
-  },
-  containerWrapper: {
-    padding: theme.spacing(1),
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  subcontainer: {
-    margin: theme.spacing(2),    
-    padding: theme.spacing(1),
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  subcontainerHeader: {
-    bottomMargin: theme.spacing(1),
-  },
-  annotationExplanationContainer: {
-    width: '100%',
-    padding: theme.spacing(2),
-  },
-});
-
-export default withStyles(styles)(PoemViewer);
+export default PoemViewer;

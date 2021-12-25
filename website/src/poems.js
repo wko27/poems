@@ -2,6 +2,7 @@ export const testPoem = {
   title: "Mom",
   author: "Andrew Ko",
   created: "2021-08-20",
+  dedicatedTo: "Oiyin Pauline Chow",
   meter: "iambic heptameter",
   type: "rhymed poetry",
   context: "This poem is dedicated to my mother who had a long and fulfilling career as a mathematics professor.  Her numerous accomplishments can be found in her obituary below.",

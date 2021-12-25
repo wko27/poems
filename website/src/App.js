@@ -1,4 +1,4 @@
-import { ThemeProvider, createTheme } from '@material-ui/core/styles';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 import PoemViewer from './containers/PoemViewer';
 
@@ -10,6 +10,7 @@ const App = (props) => {
   const {
     title,
     author,
+    dedicatedTo,
     created,
     meter,
     type,
@@ -40,6 +41,7 @@ const App = (props) => {
         <PoemViewer
           title={title}
           author={author}
+          dedicatedTo={dedicatedTo}
           created={created}
           meter={meter}
           type={type}

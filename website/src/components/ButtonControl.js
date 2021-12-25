@@ -1,15 +1,32 @@
 import React from 'react';
 
-import { withStyles } from '@material-ui/core/styles';
+import styled from '@emotion/styled';
 
-import Button from '@material-ui/core/Button';
+import Button from '@mui/material/Button';
 
 import AssignIcon from '@material-ui/icons/ChevronRight';
 import UnassignIcon from '@material-ui/icons/ChevronLeft';
 
+const TopBottomRoot = styled.div`
+  display: flex
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+`;
+
+const SideBySideRoot = styled.div(
+  ({ theme }) => `
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: ${theme.spacing(2)};
+  `
+);
+
 export const TopBottomButtonControl = (props) => {
   const {
-    classes,
     onForward,
     onBack,
     disableForward,
@@ -17,7 +34,7 @@ export const TopBottomButtonControl = (props) => {
   } = props;
 
   return (
-    <div className={classes.topBottomContainer}>
+    <TopBottomRoot>
       <Button
         startIcon={<UnassignIcon />}
         endIcon={<AssignIcon style={{visibility: "hidden"}}/>}
@@ -34,13 +51,12 @@ export const TopBottomButtonControl = (props) => {
       >
         Next
       </Button>
-    </div>
+    </TopBottomRoot>
   );
 }
 
 export const SideBySideButtonControl = (props) => {
   const {
-    classes,
     onForward,
     onBack,
     disableForward,
@@ -48,7 +64,7 @@ export const SideBySideButtonControl = (props) => {
   } = props;
 
   return (
-    <div className={classes.sideBySideContainer}>
+    <SideBySideRoot>
       <Button
         startIcon={<UnassignIcon />}
         onClick={onBack}
@@ -63,25 +79,10 @@ export const SideBySideButtonControl = (props) => {
       >
         Next
       </Button>
-    </div>
+    </SideBySideRoot>
   );
 }
 
-const styles = (theme) => ({
-  topBottomContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sideBySideContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    padding: theme.spacing(2),
-  },
-});
+const ButtonControl = SideBySideButtonControl;
 
-export default withStyles(styles)(SideBySideButtonControl);
+export default ButtonControl;
