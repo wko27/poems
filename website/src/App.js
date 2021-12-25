@@ -1,6 +1,6 @@
 import { ThemeProvider, createTheme } from '@material-ui/core/styles';
 
-import PoemViewer from './PoemViewer';
+import PoemViewer from './containers/PoemViewer';
 
 import {
   testPoem,
@@ -9,6 +9,10 @@ import {
 const App = (props) => {
   const {
     title,
+    author,
+    created,
+    meter,
+    type,
     context,
     links,
     content,
@@ -35,6 +39,10 @@ const App = (props) => {
       <ThemeProvider theme={theme}>
         <PoemViewer
           title={title}
+          author={author}
+          created={created}
+          meter={meter}
+          type={type}
           context={context}
           links={links}
           content={content}

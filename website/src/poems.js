@@ -1,5 +1,9 @@
 export const testPoem = {
   title: "Mom",
+  author: "Andrew Ko",
+  created: "2021-08-20",
+  meter: "iambic heptameter",
+  type: "rhymed poetry",
   context: "This poem is dedicated to my mother who had a long and fulfilling career as a mathematics professor.  Her numerous accomplishments can be found in her obituary below.",
   links: [{
     title: 'Obituary',
@@ -24,9 +28,20 @@ export const testPoem = {
       sections: [
         [16, 15, 21],
         [16, 51, 66],
-        [18, 27, 41],
       ],
-      explanation: "Depths here refers to the depths of knowledge to explore.  Her students said she was like the unquestionable captain of the classroom.",
+      explanation: "My mom's students said she was like the unquestionable captain of the classroom.",
+    },
+    {
+      sections: [
+        [16, 32, 39],
+      ],
+      explanation: "Complexity theory is a field of computer science and mathematics",
+    },
+    {
+      sections: [
+        [16, 51, 66],
+      ],
+      explanation: "My mom was the first of her siblings to come to the US across the Pacific.",
     },
     {
       sections: [
@@ -41,7 +56,7 @@ export const testPoem = {
         [21, 29, 34],
         [22, 22, 26],
       ],
-      explanation: "My mother was a first generation American and always remembered that she came as an immigrant",
+      explanation: "My mom was a first generation American and always remembered that she came as an immigrant",
     },
     {
       sections: [
@@ -59,14 +74,14 @@ export const testPoem = {
       sections: [
         [25, 44, 57],
       ],
-      explanation: "My mother was deaf in her left ear.",
+      explanation: "My mom was deaf in her left ear.",
     },
     {
       sections: [
         [25, 44, 57],
         [27, 40, 46],
       ],
-      explanation: "More sensory themes.  My mother also had poor eyesight and relied on glasses.",
+      explanation: "More sensory themes.  My mom also had poor eyesight and relied on glasses.",
     },
   ],
   content: "\

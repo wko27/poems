@@ -126,7 +126,7 @@ const TextPart = (props) => {
   return (
     <Typography
       className={className}
-      variant="body2"
+      variant="h6"
       component="span"
       onClick={onSelect}
     >
