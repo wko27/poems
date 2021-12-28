@@ -36,7 +36,7 @@ const AccountDialog = () => {
   const dispatch = useDispatch();
 
   // Fire a single check logged in once
-  useEffect(() => dispatch(checkLoggedIn()), []);
+  useEffect(() => dispatch(checkLoggedIn()), [dispatch]);
 
   const [formType, setFormType] = useState(LOGIN);
   const [username, setUsername] = useState("");

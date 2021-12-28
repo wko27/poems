@@ -20,6 +20,7 @@ const initialState = {
   email: undefined,
   emailVerified: false,
   accountError: undefined,
+  loginCheckComplete: false,
 };
 
 const handleUserSignedIn = async (auth, user) => {
@@ -56,10 +57,20 @@ export const checkLoggedIn = createAsyncThunk(
 
     return new Promise((resolve, reject) =>
       onAuthStateChanged(auth, (user) => {
+        const {
+          loginCheckComplete,
+        } = thunkAPI.getState().user;
+
         if (user) {
-          resolve(handleUserSignedIn(auth, user));
+          if (!loginCheckComplete) {
+            console.log(`Auth check complete, user is already signed in`);
+            resolve(handleUserSignedIn(auth, user));
+          }
         } else {
-          reject();
+          if (!loginCheckComplete) {
+            console.log(`Auth check complete, user is NOT signed in`);
+            reject();
+          }
         }
       })
     );
@@ -127,6 +138,8 @@ export const login = createAsyncThunk(
     
     const userCredential = await signInWithEmailAndPassword(auth, enteredEmail, enteredPassword);
 
+    console.log(`User signed in`);
+
     return handleUserSignedIn(auth, userCredential.user);
   }
 );
@@ -139,7 +152,7 @@ export const logout = createAsyncThunk(
   }
 );
 
-const signInReducer = (state, action) => {
+const signInReducer = (loginCheckComplete) => (state, action) => {
   const {
     userId,
     username,
@@ -164,6 +177,7 @@ const signInReducer = (state, action) => {
     emailVerified,
     isLoggedIn: true,
     isLoginOpen: false,
+    loginCheckComplete: loginCheckComplete === undefined ? state.loginCheckComplete : loginCheckComplete,
   };
 };
 
@@ -205,8 +219,14 @@ const userSlice = createSlice({
           isLoginOpen: false,
         };
       })
-      .addCase(checkLoggedIn.fulfilled, signInReducer)
-      .addCase(login.fulfilled, signInReducer)
+      .addCase(checkLoggedIn.fulfilled, signInReducer(true))
+      .addCase(checkLoggedIn.rejected, (state, action) => {
+        return {
+          ...state,
+          loginCheckComplete: true,
+        };
+      })
+      .addCase(login.fulfilled, signInReducer(undefined))
       .addCase(login.rejected, (state, action) => {
         const accountError = "Invalid password or email";
 
@@ -216,7 +236,11 @@ const userSlice = createSlice({
         };
       })
       .addCase(logout.fulfilled, (state, action) => {
-        return initialState;
+        console.log(`Logged out user`);
+        return {
+          ...initialState,
+          loginCheckComplete: state.loginCheckComplete,
+        };
       })
   },
 })

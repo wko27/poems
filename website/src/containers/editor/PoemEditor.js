@@ -6,8 +6,8 @@ import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 
-import ButtonControl from '../components/ButtonControl';
-import ParsedPoem from './ParsedPoem';
+import ButtonControl from 'components/buttons/ButtonControl';
+import HighlightedPoem from 'components/poem/HighlightedPoem';
 
 const flexColumnCentered = `
   display: flex;
@@ -150,7 +150,7 @@ const AnnotationContainer = styled.div`
   align-self: flex-start;
 `;
 
-const PoemViewer = (props) => {
+const PoemEditor = (props) => {
   const {
     title,
     content,
@@ -189,7 +189,7 @@ const PoemViewer = (props) => {
         <Typography variant='h1'>
           {title}
         </Typography>
-        <ParsedPoem
+        <HighlightedPoem
           content={content}
           annotation={annotation}
         />
@@ -199,4 +199,4 @@ const PoemViewer = (props) => {
   );
 };
 
-export default PoemViewer;
+export default PoemEditor;

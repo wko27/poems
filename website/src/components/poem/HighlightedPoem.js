@@ -1,6 +1,6 @@
 import { styled } from '@mui/system';
 
-import Typography from '@mui/material/Typography';
+import HighlightedText from './HighlightedText';
 
 const PLAIN = "PLAIN";
 const HIGHLIGHTED = "HIGHLIGHTED";
@@ -16,13 +16,6 @@ const StanzaBody = styled('p')(
   ({ theme }) => `
     margin-top: ${theme.spacing(0.5)};
     margin-bottom: ${theme.spacing(0.5)};
-  `
-);
-
-const HighlightedText = styled(Typography)(
-  ({ theme }) => `
-    text-decoration: underline;
-    background-color: ${theme.palette.info.light};
   `
 );
 
@@ -109,63 +102,7 @@ const parseStructure = (content, sections) => {
   };
 };
 
-const TextPart = (props) => {
-  const {
-    text,
-    lineIdx,
-    lineOffset,
-    contentLines,
-    highlight,
-  } = props;
-
-  const onSelect = (event) => {
-    const selection = window.getSelection();
-
-    const {
-      anchorNode,
-      anchorOffset,
-      focusNode,
-      focusOffset,
-    } = selection;
-
-    if (focusNode !== anchorNode) {
-      console.log(`A single annotation can only reside in one line`);
-      return;
-    }
-
-    if (anchorOffset === focusOffset) {
-      return;
-    }
-
-    const selectionStartIdx = lineOffset + anchorOffset;
-    const selectionEndIdx = lineOffset + focusOffset;
-    const selectedText = contentLines[lineIdx].substring(selectionStartIdx, selectionEndIdx);
-
-    console.log(`Line ${lineIdx} - Offset (${selectionStartIdx}, ${selectionEndIdx}): '${selectedText}'`);
-  }
-
-  return highlight
-    ? (
-      <HighlightedText
-        variant="h6"
-        component="span"
-        onClick={onSelect}
-      >
-        {text}
-      </HighlightedText>
-    )
-    : (
-      <Typography
-        variant="h6"
-        component="span"
-        onClick={onSelect}
-      >
-        {text}
-      </Typography>
-    );
-}
-
-const ParsedPoem = (props) => {
+const HighlightedPoem = (props) => {
   const {
     content,
     annotation,
@@ -198,7 +135,7 @@ const ParsedPoem = (props) => {
         switch (type) {
           case PLAIN:
             lineElements.push(
-              <TextPart
+              <HighlightedText
                 key={lineElements.length}
                 lineIdx={lineIdx}
                 lineOffset={lineOffset}
@@ -209,7 +146,7 @@ const ParsedPoem = (props) => {
             break;
           case HIGHLIGHTED:
             lineElements.push(
-              <TextPart
+              <HighlightedText
                 highlight
                 key={lineElements.length}
                 lineIdx={lineIdx}
@@ -245,4 +182,4 @@ const ParsedPoem = (props) => {
   return elements;
 }
 
-export default ParsedPoem;
+export default HighlightedPoem;
