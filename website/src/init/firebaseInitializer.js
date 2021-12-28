@@ -1,6 +1,5 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 const CONFIG = {
   apiKey: "AIzaSyA3xcW2cb5f0AcMsecSiqYX5Uirfuok1Jo",
@@ -16,6 +15,10 @@ const CONFIG = {
 /** Initialize Firebase with the default database */
 export function initializeFirebase() {
   initializeApp(CONFIG);
+
+  const analytics = getAnalytics();
+  
+  logEvent(analytics, 'page_loaded');
 
   console.log('Initialized Firebase');
 }

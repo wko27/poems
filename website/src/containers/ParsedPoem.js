@@ -1,9 +1,30 @@
-import { css } from '@emotion/react';
+import { styled } from '@mui/system';
 
 import Typography from '@mui/material/Typography';
 
 const PLAIN = "PLAIN";
 const HIGHLIGHTED = "HIGHLIGHTED";
+
+const StanzaStart = styled('p')(
+  ({ theme }) => `
+    margin-top: ${theme.spacing(4)};
+    margin-bottom: ${theme.spacing(0.5)};
+  `
+);
+
+const StanzaBody = styled('p')(
+  ({ theme }) => `
+    margin-top: ${theme.spacing(0.5)};
+    margin-bottom: ${theme.spacing(0.5)};
+  `
+);
+
+const HighlightedText = styled(Typography)(
+  ({ theme }) => `
+    text-decoration: underline;
+    background-color: ${theme.palette.info.light};
+  `
+);
 
 /*
  * Each poem is parsed into a list of stanzas
@@ -90,11 +111,11 @@ const parseStructure = (content, sections) => {
 
 const TextPart = (props) => {
   const {
-    css,
     text,
     lineIdx,
     lineOffset,
     contentLines,
+    highlight,
   } = props;
 
   const onSelect = (event) => {
@@ -123,16 +144,25 @@ const TextPart = (props) => {
     console.log(`Line ${lineIdx} - Offset (${selectionStartIdx}, ${selectionEndIdx}): '${selectedText}'`);
   }
 
-  return (
-    <Typography
-      css={css}
-      variant="h6"
-      component="span"
-      onClick={onSelect}
-    >
-      {text}
-    </Typography>
-  );
+  return highlight
+    ? (
+      <HighlightedText
+        variant="h6"
+        component="span"
+        onClick={onSelect}
+      >
+        {text}
+      </HighlightedText>
+    )
+    : (
+      <Typography
+        variant="h6"
+        component="span"
+        onClick={onSelect}
+      >
+        {text}
+      </Typography>
+    );
 }
 
 const ParsedPoem = (props) => {
@@ -180,11 +210,8 @@ const ParsedPoem = (props) => {
           case HIGHLIGHTED:
             lineElements.push(
               <TextPart
+                highlight
                 key={lineElements.length}
-                css={(theme) => css`
-                  textDecoration: 'underline',
-                  backgroundColor: theme.palette.info.light,
-                `}
                 lineIdx={lineIdx}
                 lineOffset={lineOffset}
                 text={text}
@@ -197,20 +224,19 @@ const ParsedPoem = (props) => {
         }
       }
 
-      const css = isFirstLineOfStanza
-        ? (theme) => css`
-          marginTop: theme.spacing(4),
-          marginBottom: theme.spacing(0.5),
-        `
-        : (theme) => css`
-          marginTop: theme.spacing(0.5),
-          marginBottom: theme.spacing(0.5),
-        `;
-      elements.push((
-        <p key={elements.length} css={css}>
-          {lineElements}
-        </p>
-      ));
+      if (isFirstLineOfStanza) {
+        elements.push(
+          <StanzaStart key={elements.length}>
+            {lineElements}
+          </StanzaStart>
+        );
+      } else {
+        elements.push(
+          <StanzaBody key={elements.length}>
+            {lineElements}
+          </StanzaBody>
+        );
+      }
 
       isFirstLineOfStanza = false;
     }
@@ -219,14 +245,4 @@ const ParsedPoem = (props) => {
   return elements;
 }
 
-const styles = (theme) => ({
-  plain: {
-  },
-  highlighted: {
-    textDecoration: 'underline',
-    backgroundColor: theme.palette.info.light,
-  },
-});
-
 export default ParsedPoem;
-

@@ -4,8 +4,8 @@ import styled from '@emotion/styled';
 
 import Button from '@mui/material/Button';
 
-import AssignIcon from '@material-ui/icons/ChevronRight';
-import UnassignIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 const TopBottomRoot = styled.div`
   display: flex
@@ -36,16 +36,16 @@ export const TopBottomButtonControl = (props) => {
   return (
     <TopBottomRoot>
       <Button
-        startIcon={<UnassignIcon />}
-        endIcon={<AssignIcon style={{visibility: "hidden"}}/>}
+        startIcon={<ChevronLeftIcon />}
+        endIcon={<ChevronRightIcon style={{visibility: "hidden"}}/>}
         onClick={onBack}
         disabled={disableBack}
       >
         Previous
       </Button>
       <Button
-        startIcon={<UnassignIcon style={{visibility: "hidden"}}/>}
-        endIcon={<AssignIcon />}
+        startIcon={<ChevronLeftIcon style={{visibility: "hidden"}}/>}
+        endIcon={<ChevronRightIcon />}
         onClick={onForward}
         disabled={disableForward}
       >
@@ -66,14 +66,14 @@ export const SideBySideButtonControl = (props) => {
   return (
     <SideBySideRoot>
       <Button
-        startIcon={<UnassignIcon />}
+        startIcon={<ChevronLeftIcon />}
         onClick={onBack}
         disabled={disableBack}
       >
         Previous
       </Button>
       <Button
-        endIcon={<AssignIcon />}
+        endIcon={<ChevronRightIcon />}
         onClick={onForward}
         disabled={disableForward}
       >

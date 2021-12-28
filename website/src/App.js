@@ -1,25 +1,9 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
-import PoemViewer from './containers/PoemViewer';
-
-import {
-  testPoem,
-} from './poems';
+import AppBar from 'containers/AppBar';
+import Workspace from 'containers/Workspace';
 
 const App = (props) => {
-  const {
-    title,
-    author,
-    dedicatedTo,
-    created,
-    meter,
-    type,
-    context,
-    links,
-    content,
-    annotations,
-  } = testPoem;
-
   const theme = createTheme({
     window: {
       width: "800px",
@@ -36,22 +20,10 @@ const App = (props) => {
 
   return (
     <div className="App">
-      <header className="App-header">
+      <AppBar />
       <ThemeProvider theme={theme}>
-        <PoemViewer
-          title={title}
-          author={author}
-          dedicatedTo={dedicatedTo}
-          created={created}
-          meter={meter}
-          type={type}
-          context={context}
-          links={links}
-          content={content}
-          annotations={annotations}
-        />
+        <Workspace />
       </ThemeProvider>
-      </header>
     </div>
   );
 };
