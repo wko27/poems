@@ -1,48 +1,37 @@
-import * as _ from 'lodash';
-
 import React, { useState, useEffect } from 'react';
+
+import styled from '@emotion/styled';
+
+import Button from '@mui/material/Button';
 
 import { useNavigate } from "react-router-dom";
 
 import { useSelector } from 'react-redux';
 
-import Button from '@mui/material/Button';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
+import Typography from '@mui/material/Typography';
 
-import PoemIcon from '@mui/icons-material/Article';
+import PoemList from 'components/list/PoemList';
 
-import PoemRenderer from '../viewer/PoemRenderer';
+import {
+  PaperColumn,
+} from 'styles';
 
 import {
   fetchUserPoems,
+  createPoem,
 } from 'features/poemSlice';
 
-const Contrived = (props) => {
-  const {
-    poemId,
-  } = props;
-
-  const userId = useSelector((state) => {
-    return state.user.userId;
-  });
-
-  return userId;
-}
+const PoemListContainer = styled(PaperColumn)`
+  width: 50vw,
+`;
 
 const ProfilePoemViewer = (props) => {
   const navigate = useNavigate();
 
   const {
-    poemId,
-  } = props;
-
-  const userId = useSelector((state) => {
-    return state.user.userId;
-  });
+    userId,
+    username,
+  } = useSelector((state) => state.user);
 
   const [userPoems, setUserPoems] = useState([]);
 
@@ -58,38 +47,26 @@ const ProfilePoemViewer = (props) => {
     }
   };
 
-  useEffect(loadUserPoems, [userId]);
-
-  const [elem, setElem] = useState(null);
-
-  if (_.isEmpty(userPoems)) {
-    return "No poems found";
+  const handleCreatePoem = async () => {
+    const poemId = await createPoem(userId, username);
+    navigate(`/poems/edit/${poemId}`);
   }
 
-  return (
-    <List>
-      {
-        userPoems.map((userPoem, idx) => {
-          const {
-            title,
-            created,
-          } = userPoem;
+  useEffect(loadUserPoems, [userId, navigate]);
 
-          return (
-            <ListItem key={idx}>
-              <ListItemIcon>
-                <PoemIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary={title}
-                secondary={`Created ${new Date(created)}`}
-              />
-            </ListItem>
-          );
-        })
-      }
-    </List>
-    
+  return (
+    <PaperColumn>
+      <Button onClick={handleCreatePoem} variant='outlined'>Compose Poem</Button>
+      <PoemListContainer>
+        <Typography>
+          My Poems
+        </Typography>
+        <PoemList
+          poems={userPoems}
+          emptyDisplayText='No poems found'
+        />
+      </PoemListContainer>
+    </PaperColumn>
   );
 };
 

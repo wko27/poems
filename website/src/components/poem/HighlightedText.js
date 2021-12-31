@@ -1,24 +1,33 @@
+import { forwardRef } from 'react';
+
 import { styled } from '@mui/system';
 
 import Typography from '@mui/material/Typography';
 
+const Bolded = styled(Typography)(
+  ({ theme }) => `
+      background-color: ${theme.palette.highlight.main};
+    `
+);
+
 const Highlighted = styled(Typography)(
   ({ theme }) => `
-    text-decoration: underline;
-    background-color: ${theme.palette.info.light};
+    background-color: ${theme.palette.highlight.light};
   `
 );
 
-const HighlightedText = (props) => {
+const HighlightedText = forwardRef((props, ref) => {
   const {
     text,
     lineIdx,
     lineOffset,
     contentLines,
     highlight,
+    bold,
+    onSelect = () => {},
   } = props;
 
-  const onSelect = (event) => {
+  const handleSelect = (event) => {
     const selection = window.getSelection();
 
     const {
@@ -33,36 +42,47 @@ const HighlightedText = (props) => {
       return;
     }
 
-    if (anchorOffset === focusOffset) {
-      return;
-    }
-
     const selectionStartIdx = lineOffset + anchorOffset;
     const selectionEndIdx = lineOffset + focusOffset;
     const selectedText = contentLines[lineIdx].substring(selectionStartIdx, selectionEndIdx);
 
-    console.log(`Line ${lineIdx} - Offset (${selectionStartIdx}, ${selectionEndIdx}): '${selectedText}'`);
+    onSelect({
+      lineIdx,
+      selectionStartIdx,
+      selectionEndIdx,
+      selectedText,
+    });
   }
 
-  return highlight
+  return bold
     ? (
-      <Highlighted
-        variant="h6"
-        component="span"
-        onClick={onSelect}
-      >
-        {text}
-      </Highlighted>
-    )
-    : (
-      <Typography
-        variant="h6"
-        component="span"
-        onClick={onSelect}
-      >
-        {text}
-      </Typography>
-    );
-}
+        <Bolded
+          variant="h6"
+          component="span"
+          onClick={handleSelect}
+        >
+          {text}
+        </Bolded>
+      )
+    : highlight
+      ? (
+        <Highlighted
+          variant="h6"
+          component="span"
+          onClick={handleSelect}
+        >
+          {text}
+        </Highlighted>
+      )
+      : (
+        <Typography
+          variant="h6"
+          component="span"
+          onClick={handleSelect}
+        >
+          {text}
+        </Typography>
+      );
+});
 
 export default HighlightedText;

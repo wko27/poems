@@ -32,6 +32,7 @@ const Login = (props) => (
       fullWidth
       autoFocus
       required
+      defaultValue={props.email}
       onChange={event => props.setEmail(event.target.value)}
       InputProps={{
         startAdornment: (
@@ -47,6 +48,7 @@ const Login = (props) => (
       type="password"
       fullWidth
       required
+      defaultValue={props.password}
       onChange={event => props.setPassword(event.target.value)}
       InputProps={{
         startAdornment: (

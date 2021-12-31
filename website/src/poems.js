@@ -1,4 +1,6 @@
 export const testPoem = {
+  poemId: 1,
+  creatorUserId: "YYCGsmUWtZSMK15u9NXPX1L965y1",
   title: "Mom",
   author: "Andrew Ko",
   created: "2021-08-20",

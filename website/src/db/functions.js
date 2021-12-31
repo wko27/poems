@@ -2,7 +2,13 @@
  * Wraps normal Firebase reference operations with a timeout that throws an error with a useful message
  */
 
-import { get, update as firebaseUpdate, remove as firebaseRemove, set } from "firebase/database";
+import {
+  get,
+  update as firebaseUpdate,
+  remove as firebaseRemove,
+  set,
+  push as firebasePush,
+} from "firebase/database";
 
 import { waitAtMost, assertNotNull } from 'utils';
 
@@ -71,7 +77,7 @@ export function push(action, ref, value, timeout = DEFAULT_TIMEOUT) {
   return waitAtMost(
     timeout,
     action,
-    ref.push(value).then(value => {
+    firebasePush(ref, value).then(value => {
       const elapsed = Date.now() - start;
       console.log(action + ' took ' + elapsed + ' ms');
       return value;

@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 
-import PoemRenderer from './PoemRenderer';
+import { useParams, useNavigate } from "react-router-dom";
+
+import { useSelector } from 'react-redux';
+
+import ViewPoemRenderer from './ViewPoemRenderer';
+
+import BlockingProgressIndicator from 'components/progress/BlockingProgressIndicator';
 
 import {
   fetchPoem,
 } from 'features/poemSlice';
 
 const PoemViewer = (props) => {
-  const {
-    poemId,
-  } = props;
+  const { poemId } = useParams();
 
   const [poem, setPoem] = useState(null);
 
@@ -23,12 +27,15 @@ const PoemViewer = (props) => {
 
   useEffect(loadPoem, [poemId]);
 
+  const userId = useSelector((state) => state.user.userId);
+
   if (poem === null) {
-    return "Loading ...";
+    return (<BlockingProgressIndicator/>);
   }
 
   const {
     title,
+    creatorUserId,
     author,
     dedicatedTo,
     created,
@@ -40,8 +47,11 @@ const PoemViewer = (props) => {
     annotations,
   } = poem;
 
+  const allowEdit = creatorUserId === userId;
+
   return (
-    <PoemRenderer
+    <ViewPoemRenderer
+      poemId={poemId}
       title={title}
       author={author}
       dedicatedTo={dedicatedTo}
@@ -52,6 +62,7 @@ const PoemViewer = (props) => {
       links={links}
       content={content}
       annotations={annotations}
+      allowEdit={allowEdit}
     />
   );
 };

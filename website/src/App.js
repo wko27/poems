@@ -6,6 +6,8 @@ import AppBar from 'containers/AppBar';
 import Workspace from 'containers/Workspace';
 import AccountDialog from 'containers/login/AccountDialog';
 
+import { blue, yellow } from '@mui/material/colors';
+
 const App = (props) => {
   const theme = createTheme({
     window: {
@@ -18,6 +20,12 @@ const App = (props) => {
       fontFamily: [
         "Palanquin",
       ].join(","),
+    },
+    palette: {
+      highlight: {
+        main: yellow[500],
+        light: yellow[100],
+      },
     },
   });
 

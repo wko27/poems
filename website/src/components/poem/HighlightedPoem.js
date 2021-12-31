@@ -1,18 +1,25 @@
+import * as _ from 'lodash';
+
 import { styled } from '@mui/system';
 
 import HighlightedText from './HighlightedText';
 
+import {
+  findDistinctSections,
+} from 'logic';
+
 const PLAIN = "PLAIN";
 const HIGHLIGHTED = "HIGHLIGHTED";
+const BOLDED = "BOLDED";
 
-const StanzaStart = styled('p')(
+const StanzaStart = styled('div')(
   ({ theme }) => `
     margin-top: ${theme.spacing(4)};
     margin-bottom: ${theme.spacing(0.5)};
   `
 );
 
-const StanzaBody = styled('p')(
+const StanzaBody = styled('div')(
   ({ theme }) => `
     margin-top: ${theme.spacing(0.5)};
     margin-bottom: ${theme.spacing(0.5)};
@@ -22,9 +29,36 @@ const StanzaBody = styled('p')(
 /*
  * Each poem is parsed into a list of stanzas
  * Each stanza comprises of a list of lines
- * Each line is a list of contiguous PLAIN and HIGHLIGHTED text
+ * Each line is a list of contiguous PLAIN, HIGHLIGHTED, and BOLDED text
  */
-const parseStructure = (content, sections) => {
+const parseStructure = (content, annotations, selectedAnnotation) => {
+
+  const uniqueSections = [];
+  const annotationsBySection = {};  
+
+  const sortedAnnotations = [...annotations];
+  if (selectedAnnotation != null) {
+    sortedAnnotations.unshift(selectedAnnotation);
+  }
+
+  for (const annotation of sortedAnnotations) {
+    for (const section of annotation.sections) {
+      const unique = findDistinctSections(uniqueSections, section);
+
+      unique.forEach((s) => {
+        uniqueSections.push(s)
+        annotationsBySection[s] = [...(annotationsBySection[s] || []), annotation];
+      });
+    }
+  }
+
+  const uniqueSortedSections = _.sortBy(uniqueSections,
+    ([lineIdx, startIdx, endIdx]) => lineIdx,
+    ([lineIdx, startIdx, endIdx]) => startIdx,
+  );
+
+  const selectedSections = selectedAnnotation == null ? [] : selectedAnnotation.sections;
+
   const lines = content.trim().split('\n');
 
   // Start with one stanza containing one line
@@ -52,11 +86,14 @@ const parseStructure = (content, sections) => {
     let lineOffset = 0;
 
     while (true) {
-      if (sectionIdx >= sections.length) {
+      if (sectionIdx >= uniqueSortedSections.length) {
         break;
       }
 
-      const [sectionLineIdx, startIdx, endIdx] = sections[sectionIdx];
+      const section = uniqueSortedSections[sectionIdx];
+
+      const isSelected = selectedSections.includes(section);
+      const [sectionLineIdx, startIdx, endIdx] = section;
 
       // Each section must be contained within a line
       // If the section is before or after this line, then it is not in this line
@@ -71,14 +108,14 @@ const parseStructure = (content, sections) => {
           lineIdx,
           lineOffset,
         });
-        
       }
 
       currentLine.push({
         text: line.substring(startIdx, endIdx),
-        type: HIGHLIGHTED,
+        type: isSelected ? BOLDED : HIGHLIGHTED,
         lineIdx,
         lineOffset: startIdx,
+        annotations: annotationsBySection[section],
       });
 
       lineOffset = endIdx;
@@ -105,20 +142,21 @@ const parseStructure = (content, sections) => {
 const HighlightedPoem = (props) => {
   const {
     content,
-    annotation,
+    selectedAnnotation,
+    annotations,
+    onSelectAnnotations = () => {},
+    onSelectText = () => {},
+    setAnnotatedRef,
   } = props;
-
-  const {
-    sections = [],
-  } = annotation || {};
 
   const {
     contentLines,
     stanzas,
-  } = parseStructure(content, sections);
+  } = parseStructure(content, annotations, selectedAnnotation);
 
   const elements = [];
 
+  let firstRefSet = false;
   for (const stanza of stanzas) {
     let isFirstLineOfStanza = true;
 
@@ -130,7 +168,13 @@ const HighlightedPoem = (props) => {
           text,
           lineIdx,
           lineOffset,
+          annotations,
         } = part;
+
+        const onSelect = (selectedText) => {
+          onSelectAnnotations(annotations);
+          onSelectText(selectedText);
+        };
 
         switch (type) {
           case PLAIN:
@@ -141,6 +185,7 @@ const HighlightedPoem = (props) => {
                 lineOffset={lineOffset}
                 text={text}
                 contentLines={contentLines}
+                onSelect={onSelect}
               />
             );
             break;
@@ -153,6 +198,27 @@ const HighlightedPoem = (props) => {
                 lineOffset={lineOffset}
                 text={text}
                 contentLines={contentLines}
+                onSelect={onSelect}
+              />
+            );
+            break;
+          case BOLDED:
+            if (!firstRefSet && setAnnotatedRef) {
+              lineElements.push(
+                <span key="injected" ref={setAnnotatedRef}></span>
+              );
+              firstRefSet = true;
+            }
+
+            lineElements.push(
+              <HighlightedText
+                bold
+                key={lineElements.length}
+                lineIdx={lineIdx}
+                lineOffset={lineOffset}
+                text={text}
+                contentLines={contentLines}
+                onSelect={onSelect}
               />
             );
             break;

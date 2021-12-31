@@ -6,8 +6,6 @@ import { useSelector } from 'react-redux';
 
 import PoemIcon from '@mui/icons-material/Article';
 
-import PoemRenderer from '../viewer/PoemRenderer';
-
 const PoemSearch = (props) => {
   return "search!"
 };

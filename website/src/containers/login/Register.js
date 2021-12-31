@@ -33,6 +33,7 @@ const Register = (props) => (
       fullWidth
       autoFocus
       required
+      defaultValue={props.username}
       onChange={event => props.setUsername(event.target.value)}
       InputProps={{
         startAdornment: (
@@ -48,6 +49,7 @@ const Register = (props) => (
       type="email"
       fullWidth
       required
+      defaultValue={props.email}
       onChange={event => props.setEmail(event.target.value)}
       InputProps={{
         startAdornment: (
@@ -63,6 +65,7 @@ const Register = (props) => (
       type="password"
       fullWidth
       required
+      defaultValue={props.password}
       onChange={event => props.setPassword(event.target.value)}
       InputProps={{
         startAdornment: (

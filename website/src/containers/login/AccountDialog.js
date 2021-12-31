@@ -10,7 +10,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import Slide from '@mui/material/Slide';
-import Snackbar from '@mui/material/Snackbar';
 
 import Login from './Login';
 import Register from './Register';
@@ -129,6 +128,8 @@ const AccountDialog = () => {
         </>
       );
       break;
+    default:
+      throw Error(`Unhandled form type ${formType}`);
   }
 
   return (

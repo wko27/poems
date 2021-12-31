@@ -27,35 +27,36 @@ export const fetchUserPoems = async (userId) => {
   );
 
   const poems = userPoemsSnapshot.val();
-
-  return _.toPairs(poems, (poemId, userPoem) => {
+  
+  return _.toPairs(poems).map(([poemId, userPoem]) => {
     return {
       poemId,
-      userPoem,
+      ...userPoem,
     };
   });
 }
 
-export const createPoem = async (userId, title) => {
+export const createPoem = async (creatorUserId, creatorUsername, title='Untitled') => {
   const now = new Date().valueOf();
 
   const ref = await db.push(
-    `Creating poem ${title} for user ${userId}`,
-    db.paths().getAllPoems(),
+    `Creating poem ${title} for user ${creatorUserId}`,
+    db.paths().getPoems(),
     {
-      userId,
+      creatorUsername,
+      creatorUserId,
       title,
       created: now,
     }
   );
 
-  const poemId = ref.getKey();
+  const poemId = ref.key  ;
 
   await db.update(
-    `Creating poem ${title} for user ${userId}`,
-    db.paths().getUserPoems(userId),
+    `Creating poem ${title} for user ${creatorUserId}`,
+    db.paths().getUserPoems(creatorUserId),
     {
-      poemId: {
+      [poemId]: {
         title,
         created: now,
       },
@@ -63,4 +64,22 @@ export const createPoem = async (userId, title) => {
   );
 
   return poemId;
+}
+
+export const updatePoemTitle = async (userId, poemId, title) => {
+  const ref = await db.update(
+    `Updating poem title for ${poemId}`,
+    db.paths().getPoem(poemId),
+    {
+      title,
+    }
+  );
+
+  await db.update(
+    `Creating poem ${title} for user ${userId}`,
+    db.paths().getUserPoem(userId, poemId),
+    {
+      title,
+    }
+  );
 }

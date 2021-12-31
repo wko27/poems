@@ -3,7 +3,7 @@ import { Outlet, Routes, Route } from "react-router-dom";
 import { useSelector } from 'react-redux';
 
 import PoemSearch from 'containers/search/PoemSearch';
-import PoemEditor from 'containers/viewer/PoemViewer';
+import PoemEditor from 'containers/editor/PoemEditor';
 import PoemViewer from 'containers/viewer/PoemViewer';
 import ProfilePoemViewer from 'containers/profile/ProfilePoemViewer';
 
@@ -19,8 +19,12 @@ const Workspace = (props) => {
   return (
     <Routes>
       <Route path="/poems" element={<Outlet />} >
-        <Route path="edit" element={<PoemEditor />} />
-        <Route path="view" element={<PoemViewer />} />
+        <Route path="edit" element={<Outlet />} >
+          <Route path=":poemId" element={<PoemEditor />} />
+        </Route>
+        <Route path="view" element={<Outlet />} >
+          <Route path=":poemId" element={<PoemViewer />} />
+        </Route>
         <Route path="search" element={<PoemSearch />} />
       </Route>
       <Route path="/profile" element={<Outlet />} >

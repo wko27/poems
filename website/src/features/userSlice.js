@@ -10,6 +10,10 @@ import {
   signOut,
 } from "firebase/auth";
 
+import {
+  assertNonEmptyString,
+} from 'utils';
+
 import * as db from 'db';
 
 const initialState = {
@@ -86,9 +90,24 @@ export const registerAccount = createAsyncThunk(
       password: enteredPassword,
     } = arg;
 
+    assertNonEmptyString(enteredUsername, "Must provide a username");
+    assertNonEmptyString(enteredEmail, "Must provide an email");
+    assertNonEmptyString(enteredPassword, "Must provide a password");
+
+    const profileSnapshot = await db.read(
+      'Check username',
+      db.paths().getProfile(enteredUsername)
+    );
+
+    if (profileSnapshot.exists()) {
+      throw Error(`Username already taken`);
+    }
+
     const auth = getAuth();
 
     const userCredential = await createUserWithEmailAndPassword(auth, enteredEmail, enteredPassword);
+
+    const createEpochMs = new Date().valueOf();
 
     const {
       user: {
@@ -103,7 +122,16 @@ export const registerAccount = createAsyncThunk(
       db.paths().getUser(userId),
       {
         username: enteredUsername,
-        created: new Date().valueOf(),
+        created: createEpochMs,
+      }
+    );
+
+    await db.update(
+      'Register username',
+      db.paths().getProfile(enteredUsername),
+      {
+        userId,
+        created: createEpochMs,
       }
     );
 
@@ -121,6 +149,8 @@ export const registerAccount = createAsyncThunk(
 export const resetPassword = createAsyncThunk(
   'user/resetPassword',
   async (enteredEmail, thunkAPI) => {
+    assertNonEmptyString(enteredEmail, "Must provide an email");
+
     const auth = getAuth();
     await sendPasswordResetEmail(auth, enteredEmail);
   }
@@ -133,6 +163,9 @@ export const login = createAsyncThunk(
       email: enteredEmail,
       password: enteredPassword,
     } = arg;
+
+    assertNonEmptyString(enteredEmail, "Must provide an email");
+    assertNonEmptyString(enteredPassword, "Must provide a password");
 
     const auth = getAuth();
     
@@ -219,6 +252,26 @@ const userSlice = createSlice({
           isLoginOpen: false,
         };
       })
+      .addCase(registerAccount.rejected, (state, action) => {
+        const accountError = (action.error && action.error.message)
+          ? action.error.message
+          : "Invalid username, email, or password";
+
+        return {
+          ...state,
+          accountError,
+        };
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        const accountError = (action.error && action.error.message)
+          ? action.error.message
+          : "Invalid email";
+
+        return {
+          ...state,
+          accountError,
+        };
+      })
       .addCase(checkLoggedIn.fulfilled, signInReducer(true))
       .addCase(checkLoggedIn.rejected, (state, action) => {
         return {
@@ -228,7 +281,9 @@ const userSlice = createSlice({
       })
       .addCase(login.fulfilled, signInReducer(undefined))
       .addCase(login.rejected, (state, action) => {
-        const accountError = "Invalid password or email";
+        const accountError = (action.error && action.error.message)
+          ? action.error.message
+          : "Invalid email or password";
 
         return {
           ...state,
