@@ -38,7 +38,7 @@ const HighlightedText = forwardRef((props, ref) => {
     } = selection;
 
     if (focusNode !== anchorNode) {
-      console.log(`A single annotation can only reside in one line`);
+      console.log(`Ignoring text selection that spans multiple lines`);
       return;
     }
 

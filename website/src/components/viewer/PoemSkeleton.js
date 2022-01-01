@@ -1,9 +1,5 @@
-import React, { useState } from 'react';
-
 import styled from '@emotion/styled';
 
-import Link from '@mui/material/Link';
-import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 
 import {
@@ -67,8 +63,8 @@ const AnnotationContainer = styled.div`
 
 const LeftPane = (props) => {
   const {
+    info,
     details,
-    context,
     links,
   } = props;
 
@@ -77,22 +73,22 @@ const LeftPane = (props) => {
       <DescriptionSection>
         <DescriptionSectionHeader>
           <Typography variant='h4'>
-            Details
+            Info
           </Typography>
         </DescriptionSectionHeader>
         <DescriptionSectionContent>
-          {details}
+          {info}
         </DescriptionSectionContent>
       </DescriptionSection>
       
       <DescriptionSection>
         <DescriptionSectionHeader>
           <Typography variant='h4'>
-            Context
+            Details
           </Typography>
         </DescriptionSectionHeader>
         <DescriptionSectionContent>
-          {context}
+          {details}
         </DescriptionSectionContent>
       </DescriptionSection>
 
@@ -132,8 +128,8 @@ const RightPane = (props) => {
 const PoemSkeleton = (props) => {
   const {
     title,
+    info,
     details,
-    context,
     links,
     notes,
     poem,
@@ -143,8 +139,8 @@ const PoemSkeleton = (props) => {
     <Root>
       <StickyColumn>
         <LeftPane
+          info={info}
           details={details}
-          context={context}
           links={links}
         />
       </StickyColumn>

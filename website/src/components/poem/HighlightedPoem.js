@@ -141,7 +141,7 @@ const parseStructure = (content, annotations, selectedAnnotation) => {
 
 const HighlightedPoem = (props) => {
   const {
-    content,
+    content = "",
     selectedAnnotation,
     annotations,
     onSelectAnnotations = () => {},

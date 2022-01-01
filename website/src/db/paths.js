@@ -23,6 +23,11 @@ const allPaths = {
     return ref(getDatabase(), 'poems');
   },
 
+  getPoem: (poemId) => {
+    assertNonEmptyString(poemId, 'Poem id must be set');
+    return ref(getDatabase(), 'poems/' + poemId);
+  },
+
   getUserPoems: (userId) => {
     assertNonEmptyString(userId, 'User id must be set');
     return ref(getDatabase(), 'users/' + userId + '/poems');

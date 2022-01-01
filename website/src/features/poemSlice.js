@@ -3,13 +3,12 @@ import * as _ from 'lodash';
 import * as db from 'db';
 
 import {
-  testPoem,
-} from '../poems';
+  ALL_CODED_POEMS,
+} from 'logic';
 
 export const fetchPoem = async (poemId) => {
-
-  if (true) {
-    return testPoem;
+  if (poemId.startsWith("coded")) {
+    return _.find(ALL_CODED_POEMS, poem => poem.poemId === poemId);
   }
 
   const poemSnapshot = await db.read(
@@ -50,7 +49,7 @@ export const createPoem = async (creatorUserId, creatorUsername, title='Untitled
     }
   );
 
-  const poemId = ref.key  ;
+  const poemId = ref.key;
 
   await db.update(
     `Creating poem ${title} for user ${creatorUserId}`,
@@ -67,7 +66,7 @@ export const createPoem = async (creatorUserId, creatorUsername, title='Untitled
 }
 
 export const updatePoemTitle = async (userId, poemId, title) => {
-  const ref = await db.update(
+  await db.update(
     `Updating poem title for ${poemId}`,
     db.paths().getPoem(poemId),
     {

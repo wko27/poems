@@ -1,13 +1,49 @@
-export const testPoem = {
-  poemId: 1,
+const welcomePoem = {
+  poemId: "coded0",
+  creatorUserId: "YYCGsmUWtZSMK15u9NXPX1L965y1",
+  title: "Welcome",
+  author: "Andrew Ko",
+  created: 1640963500000,
+  flags: {
+    canEdit: false,
+    isPublic: true,
+  },
+  details: [
+    ["Dedicated To", "You"],
+    ["Rhyming Scheme", "limerick"],
+    ["Type", "rhymed poetry"],
+  ],
+  context: "Welcome poem for WikiMuse",
+  links: [{
+    title: 'WikiMuse',
+    url: "http://wikimuse.org",
+  }],
+  content: "\
+Welcome to the WikiMuse\n\
+a place for all to come peruse\n\
+to share, create,\n\
+collaborate\n\
+it's truly up to you to choose\n\
+"
+}
+
+const testPoem = {
+  poemId: "coded1",
   creatorUserId: "YYCGsmUWtZSMK15u9NXPX1L965y1",
   title: "Mom",
   author: "Andrew Ko",
-  created: "2021-08-20",
-  dedicatedTo: "Oiyin Pauline Chow",
-  meter: "iambic heptameter",
-  type: "rhymed poetry",
-  context: "This poem is dedicated to my mother who had a long and fulfilling career as a mathematics professor.  Her numerous accomplishments can be found in her obituary below.",
+  created: 1629514800000,
+  flags: {
+    canEdit: false,
+    isPublic: true,
+  },
+  details: [
+    ["Dedicated To", "Oiyin Pauline Chow"],
+    ["Meter", "iambic heptameter"],
+    ["Rhyming Scheme", "coupled rhyme"],
+    ["Type", "rhymed poetry"],
+  ],
+  context: "This poem is dedicated to my mother who had a long and fulfilling career as a mathematics professor.  Her numerous accomplishments can be found in her obituary link.",
   links: [{
     title: 'Obituary',
     url: "http://www.legacy.com/Link.asp?I=LS000199311211X",
@@ -122,3 +158,8 @@ may those who still remember her, embrace her passion too\n\
 but chances for the ones we love, the chance for dreams to live\n\
 \n",
 };
+
+export const ALL_CODED_POEMS = [
+  welcomePoem,
+  testPoem,
+];

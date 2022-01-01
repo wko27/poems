@@ -56,6 +56,10 @@ export default function SiteAppBar() {
     navigate('/profile/poems');
   };
 
+  const handleGoToHome = () => {
+    navigate('/');
+  };
+
   const {
     isLoggedIn,
     username,
@@ -74,7 +78,7 @@ export default function SiteAppBar() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} onClick={handleGoToHome}>
             WikiMuse
           </Typography>
           {

@@ -45,6 +45,7 @@ const PoemEditor = (props) => {
 
   return (
     <EditPoemRenderer
+      poemId={poemId}
       title={title}
       author={author}
       dedicatedTo={dedicatedTo}

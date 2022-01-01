@@ -1,13 +1,20 @@
 import * as _ from 'lodash';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { useNavigate } from "react-router-dom";
 
-import Button from '@mui/material/Button';
-import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
+import {
+  Button,
+  Link,
+  Typography,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+} from '@mui/material';
 
+import ConditionalTooltip from 'components/validation/ConditionalTooltip';
 import ButtonControl from 'components/buttons/ButtonControl';
 import HighlightedPoem from 'components/poem/HighlightedPoem';
 import PoemSkeleton from 'components/viewer/PoemSkeleton';
@@ -18,47 +25,49 @@ import {
   PaperColumn,
 } from 'styles';
 
-const Context = (props) => {
-  const {
-    context,
-  } = props;
-
-  return (
-    <Typography variant='body1'>
-      {context}
-    </Typography>
-  );
-}
-
-const Details = (props) => {
+const Info = (props) => {
   const {
     author,
-    dedicatedTo,
+    creatorUsername,
     created,
-    meter,
-    type,
   } = props;
+
+  const writtenBy = author || creatorUsername;
 
   return (
     <>
       <Typography variant='body1'>
-        {`Author: ${author}`}
+        {`Author: ${writtenBy}`}
       </Typography>
       <Typography variant='body1'>
-        {`Dedicated To: ${dedicatedTo}`}
-      </Typography>
-      <Typography variant='body1'>
-        {`Written: ${created}`}
-      </Typography>
-      <Typography variant='body1'>
-        {`Meter: ${meter}`}
-      </Typography>
-      <Typography variant='body1'>
-        {`Type: ${type}`}
+        {`Written: ${new Date(created).toLocaleDateString()}`}
       </Typography>
     </>
   );
-}
+};
+
+const Details = (props) => {
+  const {
+    details,
+  } = props;
+
+  return (
+    <Table>
+      <TableBody>
+        {
+          details.map(([key, value]) => {
+            return (
+              <TableRow key={key} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell align='center'>{key}</TableCell>
+                <TableCell align='center'>{value}</TableCell>
+              </TableRow>
+            );
+          })
+        }
+      </TableBody>
+    </Table>
+  );
+};
 
 const Links = (props) => {
   const {
@@ -95,14 +104,14 @@ const ViewPoemRenderer = (props) => {
     title,
     content,
     annotations = [],
+    creatorUsername,
     author,
-    dedicatedTo,
     created,
-    meter,
-    type,
+    details,
     context,
     links,
     allowEdit,
+    disallowEditReason,
   } = props;
 
   const navigate = useNavigate();
@@ -126,19 +135,19 @@ const ViewPoemRenderer = (props) => {
     []
   );
 
-  const details = (
-    <Details
+  const infoContainer = (
+    <Info
       author={author}
-      dedicatedTo={dedicatedTo}
+      creatorUsername={creatorUsername}
       created={created}
-      meter={meter}
-      type={type}
     />
   );
 
-  const contextContainer = (
-    <Context context={context} />
-  );
+  const detailsContainer = (
+    <Details
+      details={details}
+    />
+  )
 
   const linksContainer = (
     <Links links={links} />
@@ -176,20 +185,22 @@ const ViewPoemRenderer = (props) => {
 
   const notes = (
     <>
-      <ButtonControl
-        onForward={() => setSelectedAnnotationIdx(selectedAnnotationIdx + 1)}
-        disableForward={selectedAnnotationIdx >= annotations.length - 1}
-        onBack={() => setSelectedAnnotationIdx(selectedAnnotationIdx - 1)}
-        disableBack={selectedAnnotationIdx < 0}
-      />
       {
-        selectedAnnotation != null && (
-          <PaperColumn variant='outlined' sx={{ p: 1 }}>
-            <Typography variant='body1'>
-              {selectedAnnotation.explanation}
-            </Typography>
-          </PaperColumn>
+        !_.isEmpty(annotations) && (
+          <ButtonControl
+            onForward={() => setSelectedAnnotationIdx(selectedAnnotationIdx + 1)}
+            disableForward={selectedAnnotationIdx >= annotations.length - 1}
+            onBack={() => setSelectedAnnotationIdx(selectedAnnotationIdx - 1)}
+            disableBack={selectedAnnotationIdx < 0}
+          />
         )
+      }
+      {
+        <PaperColumn variant='outlined' sx={{ p: 1, m: 2 }}>
+          <Typography variant='body1'>
+            {selectedAnnotation == null ? context : selectedAnnotation.explanation}
+          </Typography>
+        </PaperColumn>
       }
     </>
   );
@@ -198,20 +209,21 @@ const ViewPoemRenderer = (props) => {
 
   return (
     <>
-      {
-        allowEdit && (
+      <ConditionalTooltip condition={!allowEdit} tooltipTitle={disallowEditReason}>
+        <span>
           <Button
             startIcon={<EditIcon/>}
             onClick={handleEdit}
+            disabled={!allowEdit}
           >
             Edit
           </Button>
-        )
-      }
+        </span>
+      </ConditionalTooltip>
       <PoemSkeleton
         title={titleContainer}
-        details={details}
-        context={contextContainer}
+        info={infoContainer}
+        details={detailsContainer}
         links={linksContainer}
         notes={notes}
         poem={poem}

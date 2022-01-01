@@ -1,6 +1,8 @@
+import * as _ from 'lodash';
+
 import React, { useState, useEffect } from 'react';
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { useSelector } from 'react-redux';
 
@@ -36,33 +38,44 @@ const PoemViewer = (props) => {
   const {
     title,
     creatorUserId,
+    creatorUsername,
     author,
-    dedicatedTo,
     created,
-    meter,
-    type,
+    details,
     context,
     links,
     content,
     annotations,
+    flags: {
+      canEdit,
+    } = {},
+    allowedEditors,
   } = poem;
 
-  const allowEdit = creatorUserId === userId;
+  let allowEdit = canEdit;
+  let disallowEditReason = undefined;
+
+  if (!allowEdit) {
+    disallowEditReason = `This poem can not be edited`;
+  } else if (creatorUserId !== userId && !_.includes(allowedEditors || [], userId)) {
+    allowEdit = false;
+    disallowEditReason = `You do not have edit permissions, please ask the creator for access`;
+  }
 
   return (
     <ViewPoemRenderer
       poemId={poemId}
       title={title}
+      creatorUsername={creatorUsername}
       author={author}
-      dedicatedTo={dedicatedTo}
       created={created}
-      meter={meter}
-      type={type}
+      details={details}
       context={context}
       links={links}
       content={content}
       annotations={annotations}
       allowEdit={allowEdit}
+      disallowEditReason={disallowEditReason}
     />
   );
 };

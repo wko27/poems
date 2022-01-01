@@ -6,8 +6,8 @@ import { useSelector } from 'react-redux';
 
 import PoemIcon from '@mui/icons-material/Article';
 
-const PoemSearch = (props) => {
+const Home = (props) => {
   return "search!"
 };
 
-export default PoemSearch;
+export default Home;
