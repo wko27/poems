@@ -49,7 +49,7 @@ const ProfilePoemViewer = (props) => {
 
   const handleCreatePoem = async () => {
     const poemId = await createPoem(userId, username);
-    navigate(`/poems/edit/${poemId}`);
+    navigate(`/poems/${poemId}/edit`);
   }
 
   useEffect(loadUserPoems, [userId, navigate]);

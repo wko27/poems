@@ -18,7 +18,7 @@ const PoemList = (props) => {
     emptyDisplayText,
   } = props;
 
-  const handleEdit = (poemId) => navigate(`/poems/edit/${poemId}`);
+  const handleEdit = (poemId) => navigate(`/poems/${poemId}/edit`);
 
   if (_.isEmpty(poems)) {
     return (

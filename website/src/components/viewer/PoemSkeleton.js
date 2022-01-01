@@ -31,7 +31,7 @@ const StickyColumn = styled.div`
 const DescriptionContainer = styled.div(
   ({ theme }) => `
     ${FLEX_COLUMN_CENTERED};
-    max-width: 20vw;
+    max-width: 30vw;
   `
 );
 
@@ -110,6 +110,13 @@ const LeftPane = (props) => {
   );
 }
 
+export const CenterPane = styled.div(
+  ({ theme }) => `
+    ${FLEX_COLUMN_CENTERED};
+    width: 100%;
+  `
+);
+
 const RightPane = (props) => {
   const {
     notes,
@@ -145,10 +152,10 @@ const PoemSkeleton = (props) => {
         />
       </StickyColumn>
       <Column>
-        <DivColumn>
+        <CenterPane>
           {title}
           {poem}
-        </DivColumn>
+        </CenterPane>
       </Column>
       <StickyColumn>
         <RightPane

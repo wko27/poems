@@ -1,20 +1,29 @@
+import * as _ from 'lodash';
+
 import React, { useState, useEffect } from 'react';
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from 'react-redux';
 
 import EditPoemRenderer from './EditPoemRenderer';
 
+import InvalidPermissionsDialog from 'components/validation/InvalidPermissionsDialog';
 import BlockingProgressIndicator from 'components/progress/BlockingProgressIndicator';
 
 import {
   fetchPoem,
   updatePoemTitle,
+  updatePoemDetails,
 } from 'features/poemSlice';
 
 const PoemEditor = (props) => {
-  const { poemId } = useParams();
+  const {
+    poemId,
+    onInvalidPermissions,
+  } = props;
 
   const [poem, setPoem] = useState(null);
+
+  const userId = useSelector((state) => state.user.userId);
 
   const loadPoem = () => {
     async function loadPoemAsync() {
@@ -31,31 +40,49 @@ const PoemEditor = (props) => {
   }
 
   const {
-    title,
-    author,
-    dedicatedTo,
-    created,
-    meter,
-    type,
-    context,
-    links,
-    content,
-    annotations,
+    creatorUserId,
+    allowedEditors,
   } = poem;
+
+  let {
+    flags: {
+      disallowEdit,
+      disallowEditReason,
+    } = {},
+  } = poem;
+
+  if (!disallowEdit
+    && creatorUserId !== userId
+    && !_.includes(allowedEditors || [], userId)) {
+    disallowEdit = true;
+    disallowEditReason = `You do not have edit permissions, please ask the creator for access`;
+  }
+
+  if (disallowEdit) {
+    return (
+      <InvalidPermissionsDialog
+        title="Unable to Edit"
+        content={disallowEditReason}
+        onClose={onInvalidPermissions}
+      />
+    );
+  }
+
+  const handleUpdateTitle = (title, titleFontSize) => {
+    updatePoemTitle(userId, poemId, title, titleFontSize);
+    loadPoem();
+  };
+
+  const handleUpdateDetails = (details) => {
+    updatePoemDetails(userId, poemId, details);
+    loadPoem();
+  };
 
   return (
     <EditPoemRenderer
-      poemId={poemId}
-      title={title}
-      author={author}
-      dedicatedTo={dedicatedTo}
-      created={created}
-      meter={meter}
-      type={type}
-      context={context}
-      links={links}
-      content={content}
-      annotations={annotations}
+      poem={poem}
+      onUpdateTitle={handleUpdateTitle}
+      onUpdateDetails={handleUpdateDetails}
     />
   );
 };

@@ -16,7 +16,6 @@ export const FLEX_ROW_CENTERED = `
   align-items: center;
 `;
 
-
 export const PaperColumn = styled(Paper)(
   ({ theme }) => `
     ${FLEX_COLUMN_CENTERED};
@@ -47,3 +46,4 @@ export const TYPOGRAPHY_H1 = {
   fontSize: '6rem',
   lineHeight: '1.167',
 }
+

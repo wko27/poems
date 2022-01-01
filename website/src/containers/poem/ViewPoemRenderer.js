@@ -2,10 +2,7 @@ import * as _ from 'lodash';
 
 import React, { useState, useCallback } from 'react';
 
-import { useNavigate } from "react-router-dom";
-
 import {
-  Button,
   Link,
   Typography,
   Table,
@@ -14,12 +11,9 @@ import {
   TableCell,
 } from '@mui/material';
 
-import ConditionalTooltip from 'components/validation/ConditionalTooltip';
 import ButtonControl from 'components/buttons/ButtonControl';
 import HighlightedPoem from 'components/poem/HighlightedPoem';
 import PoemSkeleton from 'components/viewer/PoemSkeleton';
-
-import EditIcon from '@mui/icons-material/Edit';
 
 import {
   PaperColumn,
@@ -27,20 +21,27 @@ import {
 
 const Info = (props) => {
   const {
-    author,
     creatorUsername,
     created,
+    author,
+    published,
   } = props;
 
-  const writtenBy = author || creatorUsername;
+  const authored = (author == null)
+    ? `Creator: ${creatorUsername}`
+    : `Author: ${author}`;
+
+  const written = (published == null)
+    ? `Published: ${new Date(published).toLocaleDateString()}`
+    : `Created: ${new Date(created).toLocaleDateString()}`
 
   return (
     <>
       <Typography variant='body1'>
-        {`Author: ${writtenBy}`}
+        {authored}
       </Typography>
       <Typography variant='body1'>
-        {`Written: ${new Date(created).toLocaleDateString()}`}
+        {written}
       </Typography>
     </>
   );
@@ -48,7 +49,7 @@ const Info = (props) => {
 
 const Details = (props) => {
   const {
-    details,
+    details = [],
   } = props;
 
   return (
@@ -100,21 +101,20 @@ const Links = (props) => {
 
 const ViewPoemRenderer = (props) => {
   const {
-    poemId,
-    title,
-    content,
-    annotations = [],
-    creatorUsername,
-    author,
-    created,
-    details,
-    context,
-    links,
-    allowEdit,
-    disallowEditReason,
+    poem: {
+      creatorUsername,
+      created,
+      author,
+      published,
+      title,
+      titleFontSize,
+      content,
+      details,
+      context,
+      annotations,
+      links,
+    },
   } = props;
-
-  const navigate = useNavigate();
 
   const [selectedAnnotationIdx, setSelectedAnnotationIdx] = useState(-1);
 
@@ -137,9 +137,10 @@ const ViewPoemRenderer = (props) => {
 
   const infoContainer = (
     <Info
-      author={author}
       creatorUsername={creatorUsername}
       created={created}
+      author={author}
+      published={published}
     />
   );
 
@@ -154,7 +155,10 @@ const ViewPoemRenderer = (props) => {
   );
 
   const titleContainer = (
-    <Typography variant='h2'>
+    <Typography
+      variant='h2'
+      sx={{ fontSize: `${titleFontSize}rem` }}
+    >
       {title}
     </Typography>
   );
@@ -205,30 +209,15 @@ const ViewPoemRenderer = (props) => {
     </>
   );
 
-  const handleEdit = () => navigate(`/poems/edit/${poemId}`);
-
   return (
-    <>
-      <ConditionalTooltip condition={!allowEdit} tooltipTitle={disallowEditReason}>
-        <span>
-          <Button
-            startIcon={<EditIcon/>}
-            onClick={handleEdit}
-            disabled={!allowEdit}
-          >
-            Edit
-          </Button>
-        </span>
-      </ConditionalTooltip>
-      <PoemSkeleton
-        title={titleContainer}
-        info={infoContainer}
-        details={detailsContainer}
-        links={linksContainer}
-        notes={notes}
-        poem={poem}
-      />
-    </>
+    <PoemSkeleton
+      title={titleContainer}
+      info={infoContainer}
+      details={detailsContainer}
+      links={linksContainer}
+      notes={notes}
+      poem={poem}
+    />
   );
 };
 

@@ -6,9 +6,11 @@ import {
   ALL_CODED_POEMS,
 } from 'logic';
 
+const ALL_CODED_POEMS_BY_ID = _.keyBy(ALL_CODED_POEMS, (poem) => poem.poemId);
+
 export const fetchPoem = async (poemId) => {
-  if (poemId.startsWith("coded")) {
-    return _.find(ALL_CODED_POEMS, poem => poem.poemId === poemId);
+  if (ALL_CODED_POEMS_BY_ID.hasOwnProperty(poemId)) {
+    return ALL_CODED_POEMS_BY_ID[poemId];
   }
 
   const poemSnapshot = await db.read(
@@ -65,20 +67,31 @@ export const createPoem = async (creatorUserId, creatorUsername, title='Untitled
   return poemId;
 }
 
-export const updatePoemTitle = async (userId, poemId, title) => {
+export const updatePoemTitle = async (userId, poemId, title, titleFontSize) => {
   await db.update(
     `Updating poem title for ${poemId}`,
     db.paths().getPoem(poemId),
     {
       title,
+      titleFontSize,
     }
   );
 
   await db.update(
-    `Creating poem ${title} for user ${userId}`,
+    `Updating poem title for user ${userId}, poem ${poemId}`,
     db.paths().getUserPoem(userId, poemId),
     {
       title,
+    }
+  );
+}
+
+export const updatePoemDetails = async (userId, poemId, details) => {
+  await db.update(
+    `Updating poem details for ${poemId}`,
+    db.paths().getPoem(poemId),
+    {
+      details
     }
   );
 }

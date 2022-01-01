@@ -143,7 +143,7 @@ const HighlightedPoem = (props) => {
   const {
     content = "",
     selectedAnnotation,
-    annotations,
+    annotations = [],
     onSelectAnnotations = () => {},
     onSelectText = () => {},
     setAnnotatedRef,

@@ -1,17 +1,18 @@
 const welcomePoem = {
-  poemId: "coded0",
+  poemId: "welcome",
   creatorUserId: "YYCGsmUWtZSMK15u9NXPX1L965y1",
   title: "Welcome",
   author: "Andrew Ko",
   created: 1640963500000,
   flags: {
-    canEdit: false,
+    disallowEdit: true,
+    disallowEditReason: `This poem can not be edited`,
     isPublic: true,
   },
   details: [
     ["Dedicated To", "You"],
     ["Rhyming Scheme", "limerick"],
-    ["Type", "rhymed poetry"],
+    ["Poem Type", "rhymed poetry"],
   ],
   context: "Welcome poem for WikiMuse",
   links: [{
@@ -34,14 +35,16 @@ const testPoem = {
   author: "Andrew Ko",
   created: 1629514800000,
   flags: {
-    canEdit: false,
+    disallowEdit: true,
+    disallowEditReason: `This poem can not be edited`,
     isPublic: true,
   },
   details: [
     ["Dedicated To", "Oiyin Pauline Chow"],
-    ["Meter", "iambic heptameter"],
+    ["Foot", "iamb"],
+    ["Meter", "heptameter"],
     ["Rhyming Scheme", "coupled rhyme"],
-    ["Type", "rhymed poetry"],
+    ["Poem Type", "rhymed poetry"],
   ],
   context: "This poem is dedicated to my mother who had a long and fulfilling career as a mathematics professor.  Her numerous accomplishments can be found in her obituary link.",
   links: [{
