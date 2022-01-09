@@ -12,7 +12,7 @@ import {
   DivColumn,
 } from 'styles';
 
-import HighlightedPoem from 'components/poem/HighlightedPoem';
+import TextView from 'components/viewer/TextView';
 
 import SearchIcon from '@mui/icons-material/Search';
 import CreateIcon from '@mui/icons-material/Create';
@@ -37,7 +37,7 @@ const WelcomePoem = (props) => {
   useEffect(loadPoem, [poemId]);
 
   return (
-    <HighlightedPoem
+    <TextView
       content={poem == null ? "" : poem.content}
     />
   );

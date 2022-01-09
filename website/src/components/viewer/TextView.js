@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 
 import { styled } from '@mui/system';
 
-import HighlightedText from './HighlightedText';
+import TextPart from './TextPart';
 
 import {
   findDistinctSections,
@@ -32,7 +32,6 @@ const StanzaBody = styled('div')(
  * Each line is a list of contiguous PLAIN, HIGHLIGHTED, and BOLDED text
  */
 const parseStructure = (content, annotations, selectedAnnotation) => {
-
   const uniqueSections = [];
   const annotationsBySection = {};  
 
@@ -139,7 +138,7 @@ const parseStructure = (content, annotations, selectedAnnotation) => {
   };
 };
 
-const HighlightedPoem = (props) => {
+const TextView = (props) => {
   const {
     content = "",
     selectedAnnotation,
@@ -147,6 +146,7 @@ const HighlightedPoem = (props) => {
     onSelectAnnotations = () => {},
     onSelectText = () => {},
     setAnnotatedRef,
+    onClick = () => {},
   } = props;
 
   const {
@@ -179,7 +179,7 @@ const HighlightedPoem = (props) => {
         switch (type) {
           case PLAIN:
             lineElements.push(
-              <HighlightedText
+              <TextPart
                 key={lineElements.length}
                 lineIdx={lineIdx}
                 lineOffset={lineOffset}
@@ -191,7 +191,7 @@ const HighlightedPoem = (props) => {
             break;
           case HIGHLIGHTED:
             lineElements.push(
-              <HighlightedText
+              <TextPart
                 highlight
                 key={lineElements.length}
                 lineIdx={lineIdx}
@@ -211,7 +211,7 @@ const HighlightedPoem = (props) => {
             }
 
             lineElements.push(
-              <HighlightedText
+              <TextPart
                 bold
                 key={lineElements.length}
                 lineIdx={lineIdx}
@@ -245,7 +245,11 @@ const HighlightedPoem = (props) => {
     }
   }
 
-  return elements;
+  return (
+    <div onClick={onClick}>
+      {elements}
+    </div>
+  );
 }
 
-export default HighlightedPoem;
+export default TextView;

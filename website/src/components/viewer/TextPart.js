@@ -16,7 +16,7 @@ const Highlighted = styled(Typography)(
   `
 );
 
-const HighlightedText = forwardRef((props, ref) => {
+const TextPart = forwardRef((props, ref) => {
   const {
     text,
     lineIdx,
@@ -85,4 +85,4 @@ const HighlightedText = forwardRef((props, ref) => {
       );
 });
 
-export default HighlightedText;
+export default TextPart;

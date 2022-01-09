@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import ViewPoemRenderer from './ViewPoemRenderer';
+import ViewTextRenderer from 'components/render/ViewTextRenderer';
 
 import BlockingProgressIndicator from 'components/progress/BlockingProgressIndicator';
 
@@ -28,7 +28,7 @@ const PoemViewer = (props) => {
   }
 
   return (
-    <ViewPoemRenderer
+    <ViewTextRenderer
       poem={poem}
     />
   );

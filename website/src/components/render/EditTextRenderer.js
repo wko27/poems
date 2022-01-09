@@ -19,10 +19,10 @@ import {
   Typography,
 } from '@mui/material';
 
-import AddDetailDialog from './AddDetailDialog';
+import AddDetailDialog from 'components/dialogs/AddDetailDialog';
 import ButtonControl from 'components/buttons/ButtonControl';
-import HighlightedPoem from 'components/poem/HighlightedPoem';
-import PoemSkeleton from 'components/viewer/PoemSkeleton';
+import TextView from 'components/viewer/TextView';
+import ViewSkeleton from 'components/viewer/ViewSkeleton';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -317,8 +317,8 @@ const EditPoemRenderer = (props) => {
 
   const notes = null;
 
-  const poem = (
-    <HighlightedPoem
+  const contentContainer = (
+    <TextView
       content={content}
       onSelectText={handleSelectText}
       annotations={[]}
@@ -326,13 +326,13 @@ const EditPoemRenderer = (props) => {
   );
 
   return (
-    <PoemSkeleton
+    <ViewSkeleton
       title={titleContainer}
       info={infoContainer}
       details={detailsContainer}
       links={linksContainer}
       notes={notes}
-      poem={poem}
+      content={contentContainer}
     />
   );
 };

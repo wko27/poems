@@ -81,16 +81,20 @@ const LeftPane = (props) => {
         </DescriptionSectionContent>
       </DescriptionSection>
       
-      <DescriptionSection>
-        <DescriptionSectionHeader>
-          <Typography variant='h4'>
-            Details
-          </Typography>
-        </DescriptionSectionHeader>
-        <DescriptionSectionContent>
-          {details}
-        </DescriptionSectionContent>
-      </DescriptionSection>
+      {
+        details == null ? null : (
+          <DescriptionSection>
+            <DescriptionSectionHeader>
+              <Typography variant='h4'>
+                Details
+              </Typography>
+            </DescriptionSectionHeader>
+            <DescriptionSectionContent>
+              {details}
+            </DescriptionSectionContent>
+          </DescriptionSection>
+        )
+      }
 
       {
         links == null ? null : (
@@ -132,14 +136,14 @@ const RightPane = (props) => {
   );
 }
 
-const PoemSkeleton = (props) => {
+const ViewSkeleton = (props) => {
   const {
     title,
     info,
     details,
     links,
     notes,
-    poem,
+    content,
   } = props;
 
   return (
@@ -154,7 +158,7 @@ const PoemSkeleton = (props) => {
       <Column>
         <CenterPane>
           {title}
-          {poem}
+          {content}
         </CenterPane>
       </Column>
       <StickyColumn>
@@ -166,4 +170,4 @@ const PoemSkeleton = (props) => {
   );
 };
 
-export default PoemSkeleton;
+export default ViewSkeleton;

@@ -11,41 +11,16 @@ import {
   TableCell,
 } from '@mui/material';
 
+import InfoContainer from './InfoContainer';
+import TitleContainer from './TitleContainer';
+
 import ButtonControl from 'components/buttons/ButtonControl';
-import HighlightedPoem from 'components/poem/HighlightedPoem';
-import PoemSkeleton from 'components/viewer/PoemSkeleton';
+import TextView from 'components/viewer/TextView';
+import ViewSkeleton from 'components/viewer/ViewSkeleton';
 
 import {
   PaperColumn,
 } from 'styles';
-
-const Info = (props) => {
-  const {
-    creatorUsername,
-    created,
-    author,
-    published,
-  } = props;
-
-  const authored = (author == null)
-    ? `Creator: ${creatorUsername}`
-    : `Author: ${author}`;
-
-  const written = (published == null)
-    ? `Published: ${new Date(published).toLocaleDateString()}`
-    : `Created: ${new Date(created).toLocaleDateString()}`
-
-  return (
-    <>
-      <Typography variant='body1'>
-        {authored}
-      </Typography>
-      <Typography variant='body1'>
-        {written}
-      </Typography>
-    </>
-  );
-};
 
 const Details = (props) => {
   const {
@@ -75,10 +50,6 @@ const Links = (props) => {
     links = [],
   } = props;
 
-  if (_.isEmpty(links)) {
-    return null;
-  }
-
   return (
     <>
       {
@@ -99,13 +70,13 @@ const Links = (props) => {
   );
 }
 
-const ViewPoemRenderer = (props) => {
+const ViewTextRenderer = (props) => {
   const {
     poem: {
       creatorUsername,
-      created,
+      createdDate,
       author,
-      published,
+      authoredDate,
       title,
       titleFontSize,
       content,
@@ -136,35 +107,33 @@ const ViewPoemRenderer = (props) => {
   );
 
   const infoContainer = (
-    <Info
+    <InfoContainer
       creatorUsername={creatorUsername}
-      created={created}
+      createdDate={createdDate}
       author={author}
-      published={published}
+      authoredDate={authoredDate}
     />
   );
 
-  const detailsContainer = (
+  const detailsContainer = _.isEmpty(details) ? null : (
     <Details
       details={details}
     />
   )
 
-  const linksContainer = (
+  const linksContainer = _.isEmpty(links) ? null : (
     <Links links={links} />
   );
 
   const titleContainer = (
-    <Typography
-      variant='h2'
-      sx={{ fontSize: `${titleFontSize}rem` }}
-    >
-      {title}
-    </Typography>
+    <TitleContainer
+      title={title}
+      titleFontSize={titleFontSize}
+    />
   );
 
-  const poem = (
-    <HighlightedPoem
+  const contentContainer = (
+    <TextView
       content={content}
       selectedAnnotation={selectedAnnotation}
       setAnnotatedRef={setAnnotatedRef}
@@ -210,15 +179,15 @@ const ViewPoemRenderer = (props) => {
   );
 
   return (
-    <PoemSkeleton
+    <ViewSkeleton
       title={titleContainer}
       info={infoContainer}
       details={detailsContainer}
       links={linksContainer}
       notes={notes}
-      poem={poem}
+      content={contentContainer}
     />
   );
 };
 
-export default ViewPoemRenderer;
+export default ViewTextRenderer;

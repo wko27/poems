@@ -46,8 +46,8 @@ export const createPoem = async (creatorUserId, creatorUsername, title='Untitled
     {
       creatorUsername,
       creatorUserId,
+      createdDate: now,
       title,
-      created: now,
     }
   );
 
@@ -58,8 +58,8 @@ export const createPoem = async (creatorUserId, creatorUsername, title='Untitled
     db.paths().getUserPoems(creatorUserId),
     {
       [poemId]: {
+        createdDate: now,
         title,
-        created: now,
       },
     }
   );
@@ -86,12 +86,46 @@ export const updatePoemTitle = async (userId, poemId, title, titleFontSize) => {
   );
 }
 
+export const updatePoemInfo = async (userId, poemId, author, authoredDate) => {
+  // Remove undefined values
+  const update = _.pickBy({
+    author,
+    authoredDate,
+  });
+
+  await db.update(
+    `Updating poem info for ${poemId}`,
+    db.paths().getPoem(poemId),
+    update,
+  );
+}
+
 export const updatePoemDetails = async (userId, poemId, details) => {
   await db.update(
     `Updating poem details for ${poemId}`,
     db.paths().getPoem(poemId),
     {
-      details
+      details,
+    }
+  );
+}
+
+export const updatePoemLinks = async (userId, poemId, links) => {
+  await db.update(
+    `Updating poem links for ${poemId}`,
+    db.paths().getPoem(poemId),
+    {
+      links,
+    }
+  );
+}
+
+export const updatePoemContent = async (userId, poemId, content) => {
+  await db.update(
+    `Updating poem content for ${poemId}`,
+    db.paths().getPoem(poemId),
+    {
+      content,
     }
   );
 }

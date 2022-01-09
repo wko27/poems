@@ -3,7 +3,7 @@ const welcomePoem = {
   creatorUserId: "YYCGsmUWtZSMK15u9NXPX1L965y1",
   title: "Welcome",
   author: "Andrew Ko",
-  created: 1640963500000,
+  createdDate: 1640963500000,
   flags: {
     disallowEdit: true,
     disallowEditReason: `This poem can not be edited`,
@@ -33,7 +33,7 @@ const testPoem = {
   creatorUserId: "YYCGsmUWtZSMK15u9NXPX1L965y1",
   title: "Mom",
   author: "Andrew Ko",
-  created: 1629514800000,
+  createdDate: 1629514800000,
   flags: {
     disallowEdit: true,
     disallowEditReason: `This poem can not be edited`,

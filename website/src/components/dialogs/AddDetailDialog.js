@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-  Typography,
 } from '@mui/material';
 
 import * as PoemDetailTypes from 'types/poemDetailTypes';
@@ -21,6 +20,7 @@ const ValueForm = (props) => {
   const {
     detailKey,
     onChange,
+    onEnter = () => {},
   } = props;
 
   if (detailKey == null) {
@@ -79,7 +79,13 @@ const AddDetailDialog = (props) => {
 
   const handleChangeDetailValue = (value) => setDetailValue(value);
 
-  const handleAdd = () => onAdd(detailKey, detailValue);
+  const handleAdd = () => {
+    if (_.isEmpty(detailKey) || _.isEmpty(detailValue)) {
+      return;
+    }
+    
+    onAdd(detailKey, detailValue);
+  }
 
   return (
     <Dialog
@@ -102,13 +108,13 @@ const AddDetailDialog = (props) => {
         <ValueForm
           detailKey={detailKey}
           onChange={handleChangeDetailValue}
+          onEnter={handleAdd}
         />
       </DialogContent>
       <DialogActions>
         <Button
           onClick={onCancel}
           color='primary'
-          autoFocus
         >
           Cancel
         </Button>
