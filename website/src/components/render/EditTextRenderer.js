@@ -15,11 +15,14 @@ import {
   TableHead,
   TableRow,
   TableCell,
+  TextareaAutosize,
   TextField,
   Typography,
 } from '@mui/material';
 
+import ConfirmDialog from 'components/dialogs/ConfirmDialog';
 import AddDetailDialog from 'components/dialogs/AddDetailDialog';
+import AddLinkDialog from 'components/dialogs/AddLinkDialog';
 import ButtonControl from 'components/buttons/ButtonControl';
 import TextView from 'components/viewer/TextView';
 import ViewSkeleton from 'components/viewer/ViewSkeleton';
@@ -53,6 +56,31 @@ function textFontFits(text, fontSizeRem, maxViewWidthProportion) {
   }
 
   return computedWidthPx < maxViewWidthProportion * viewWidthPx / 100;
+}
+
+const ContentEditor = (props) => {
+  const {
+    content,
+    onSave,
+  } = props;
+
+  const [editedContent, setEditedConent] = useState(content);
+
+  const handleChange = (event) => setEditedConent(event.target.value);
+
+  const handleSave = () => onSave(editedContent);
+
+  return (
+    <ClickAwayListener onClickAway={handleSave}>
+      <TextareaAutosize
+        aria-label="content"
+        minRows={10}
+        style={{ width: '100%' }}
+        value={editedContent}
+        onChange={handleChange}
+      />
+    </ClickAwayListener>
+  );
 }
 
 const TitleEditor = (props) => {
@@ -95,14 +123,9 @@ const TitleEditor = (props) => {
     textAlign: 'center',
   };
 
-  const handleChange = (event) => {
-    const newTitle = event.target.value;
-    setEditedTitle(newTitle);
-  };
+  const handleChange = (event) => setEditedTitle(event.target.value);
 
-  const handleSave = () => {
-    onSave(editedTitle, titleInputFontSize);
-  };
+  const handleSave = () => onSave(editedTitle, titleInputFontSize);
 
   return (
     <ClickAwayListener onClickAway={handleSave}>
@@ -170,6 +193,20 @@ const Details = (props) => {
     );
   };
 
+  const handleDeleteDetail = (key) => {
+    setDialog(
+      <ConfirmDialog
+        title="Delete Detail"
+        content="Confirm?"
+        onConfirm={() => {
+          removeDetail(key)
+          setDialog(null);
+        }}
+        onCancel={() => setDialog(null)}
+      />
+    );
+  };
+
   return (
     <>
       {
@@ -183,7 +220,7 @@ const Details = (props) => {
                       <TableCell align='center'>{key}</TableCell>
                       <TableCell align='center'>{value}</TableCell>
                       <TableCell align='center'>
-                        <IconButton onClick={() => removeDetail(key)}>
+                        <IconButton onClick={() => handleDeleteDetail(key)}>
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
@@ -208,31 +245,80 @@ const Details = (props) => {
 const Links = (props) => {
   const {
     links = [],
+    addLink,
+    removeLink,
   } = props;
 
-  if (_.isEmpty(links)) {
-    return null;
-  }
+  const [dialog, setDialog] = useState();
+
+  const handleAddLink = () => {
+    setDialog(
+      <AddLinkDialog
+        onAdd={(title, url) => {
+          addLink(title, url);
+          setDialog(null);
+        }}
+        onCancel={() => setDialog(null)}
+      />
+    );
+  };
+
+  const handleDeleteLink = (title, url) => {
+    setDialog(
+      <ConfirmDialog
+        title="Delete Link"
+        content="Confirm?"
+        onConfirm={() => {
+          removeLink(title, url);
+          setDialog(null);
+        }}
+        onCancel={() => setDialog(null)}
+      />
+    );
+  };
 
   return (
     <>
       {
-        links.map((link, idx) => {
-          const {
-            title,
-            url,
-          } = link;
-          
-          return (
-            <Link key={idx} href={url} target='_blank'>
-              {title}
-            </Link>
-          );
-        })
+        !_.isEmpty(links) && (
+          <Table>
+            <TableBody>
+              {
+                links.map((link, idx) => {
+                  const {
+                    title,
+                    url,
+                  } = link;
+                  
+                  return (
+                    <TableRow key={idx} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell align='center'>
+                        <Link key={idx} href={url} target='_blank'>
+                          {title}
+                        </Link>
+                      </TableCell>
+                      <TableCell align='center'>
+                        <IconButton onClick={() => handleDeleteLink(title, url)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              }
+            </TableBody>
+          </Table>
+        )
       }
+      <Button
+        onClick={handleAddLink}
+      >
+        Add Link
+      </Button>
+      {dialog}
     </>
   );
-}
+};
 
 const EditPoemRenderer = (props) => {
   const {
@@ -247,13 +333,17 @@ const EditPoemRenderer = (props) => {
       details = [],
       context,
       annotations,
-      links,
+      links = [],
     },
     onUpdateTitle,
     onUpdateDetails,
+    onUpdateLinks,
+    onUpdateContent,
   } = props;
   
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditingContent, setIsEditingContent] = useState(false);
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
 
   const titleContainer = !isEditingTitle
     ? (
@@ -294,14 +384,31 @@ const EditPoemRenderer = (props) => {
         [key, value],
       ])}
       removeDetail={(key) => {
-        const copy = [...details.filter((detail) => !detail[0] === key)];
+        console.log(`Removing detail '${key}'`);
+        const copy = [...details.filter((detail) => detail[0] !== key)];
         onUpdateDetails(copy);
       }}
     />
   );
 
   const linksContainer = (
-    <Links links={links} />
+    <Links
+      links={links}
+      addLink={(title, url) => onUpdateLinks([
+        ...links,
+        {
+          title,
+          url,
+        },
+      ])}
+      removeLink={(title, url) => {
+        console.log(`Removing link ${title} with url ${url}`);
+        const copy = [...links.filter((link) => link.title !== title || link.url !== url)];
+        console.log(copy);
+
+        onUpdateLinks(copy);
+      }}
+    />
   );
 
   const handleSelectText = (selection) => {
@@ -317,13 +424,36 @@ const EditPoemRenderer = (props) => {
 
   const notes = null;
 
-  const contentContainer = (
-    <TextView
-      content={content}
-      onSelectText={handleSelectText}
-      annotations={[]}
-    />
-  );
+  const contentContainer = 
+    isEditingContent ? (
+        <ContentEditor
+          content={content}
+          onSave={(updatedContent) => {
+            if (content !== updatedContent) {
+              onUpdateContent(updatedContent)
+            }
+            setIsEditingContent(false);
+          }}
+        />
+      )
+      : isEditingNotes
+        ? (
+            <ContentEditor
+              onSave={(updatedContent) => {
+                onUpdateContent(updatedContent)
+                setIsEditingContent(false);
+              }}
+              onClose={() => setIsEditingContent(false)}
+            />
+          )
+        : (
+          <TextView
+            content={content}
+            onSelectText={handleSelectText}
+            annotations={[]}
+            onClick={() => setIsEditingContent(true)}
+          />
+        );
 
   return (
     <ViewSkeleton

@@ -102,7 +102,7 @@ const PoemEditor = (props) => {
       onUpdateInfo={handleUpdateInfo}
       onUpdateDetails={handleUpdateDetails}
       onUpdateLinks={handleUpdateLinks}
-      onUpdatePoemContent={handleUpdateContent}
+      onUpdateContent={handleUpdateContent}
     />
   );
 };

@@ -31,7 +31,7 @@ const AddLinkDialog = (props) => {
   return (
     <Dialog
       open={true}
-      aria-labelledby='invalid-url'
+      aria-labelledby='add-link'
       onClose={onCancel}
     >
       <DialogTitle>
@@ -52,9 +52,8 @@ const AddLinkDialog = (props) => {
           <TextField
             id="url"
             label="URL"
-            type="text"
+            type="url"
             value={url}
-            autoFocus
             required
             onChange={handleChangeUrl}
             sx={{ minWidth: 200, m: 2 }}
