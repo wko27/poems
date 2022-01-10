@@ -156,7 +156,7 @@ const ViewTextRenderer = (props) => {
     />
   );
 
-  const notes = (
+  const annotationsContainer = (
     <>
       {
         !_.isEmpty(annotations) && (
@@ -184,7 +184,7 @@ const ViewTextRenderer = (props) => {
       info={infoContainer}
       details={detailsContainer}
       links={linksContainer}
-      notes={notes}
+      annotations={annotationsContainer}
       content={contentContainer}
     />
   );

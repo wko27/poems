@@ -123,15 +123,15 @@ export const CenterPane = styled.div(
 
 const RightPane = (props) => {
   const {
-    notes,
+    annotations,
   } = props;
 
   return (
     <AnnotationContainer>
       <Typography variant='h4'>
-        Notes
+        Annotations
       </Typography>
-      {notes}
+      {annotations}
     </AnnotationContainer>
   );
 }
@@ -142,7 +142,7 @@ const ViewSkeleton = (props) => {
     info,
     details,
     links,
-    notes,
+    annotations,
     content,
   } = props;
 
@@ -163,7 +163,7 @@ const ViewSkeleton = (props) => {
       </Column>
       <StickyColumn>
         <RightPane
-          notes={notes}
+          annotations={annotations}
         />
       </StickyColumn>
     </Root>

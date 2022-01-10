@@ -15,6 +15,7 @@ import {
   updatePoemDetails,
   updatePoemLinks,
   updatePoemContent,
+  updatePoemAnnotations,
 } from 'features/poemSlice';
 
 const PoemEditor = (props) => {
@@ -95,6 +96,11 @@ const PoemEditor = (props) => {
     loadPoem();
   };
 
+  const handleUpdateAnnotations = (annotations) => {
+    updatePoemAnnotations(userId, poemId, annotations);
+    loadPoem();
+  };
+
   return (
     <EditTextRenderer
       poem={poem}
@@ -103,6 +109,7 @@ const PoemEditor = (props) => {
       onUpdateDetails={handleUpdateDetails}
       onUpdateLinks={handleUpdateLinks}
       onUpdateContent={handleUpdateContent}
+      onUpdateAnnotations={handleUpdateAnnotations}
     />
   );
 };

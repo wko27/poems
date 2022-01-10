@@ -28,17 +28,26 @@ import TextView from 'components/viewer/TextView';
 import ViewSkeleton from 'components/viewer/ViewSkeleton';
 
 import DeleteIcon from '@mui/icons-material/Delete';
+import AnnotateIcon from '@mui/icons-material/BorderColor';
 
 import {
   MaxWidthDivRow,
   PaperColumn,
-  TYPOGRAPHY_H1,
+  createTypographyTextareaAutosize,
 } from 'styles';
+
+import {
+  truncate,
+} from 'utils';
 
 const MAX_TITLE_FONT_REM = 4;
 const MAX_TITLE_VIEW_WIDTH = 70;
 
+const DEFAULT_CONTENT_FONT_REM = 1.25;
+
 const DEBUG_TITLE_EDITOR = false;
+
+const EXPLANATION_TRUNCATE_LENGTH = 30;
 
 function textComputedWidth(text, fontSizeRem) {
   return (text.length + 1) * (fontSizeRem);
@@ -58,24 +67,27 @@ function textFontFits(text, fontSizeRem, maxViewWidthProportion) {
   return computedWidthPx < maxViewWidthProportion * viewWidthPx / 100;
 }
 
+const ContentTextareaAutosize = createTypographyTextareaAutosize('h6');
+
+const AnnotationExplanationTextareaAutosize = createTypographyTextareaAutosize('body1');
+
 const ContentEditor = (props) => {
   const {
     content,
     onSave,
   } = props;
 
-  const [editedContent, setEditedConent] = useState(content);
+  const [editedContent, setEditedContent] = useState(content);
 
-  const handleChange = (event) => setEditedConent(event.target.value);
+  const handleChange = (event) => setEditedContent(event.target.value);
 
   const handleSave = () => onSave(editedContent);
 
   return (
     <ClickAwayListener onClickAway={handleSave}>
-      <TextareaAutosize
+      <ContentTextareaAutosize
         aria-label="content"
         minRows={10}
-        style={{ width: '100%' }}
         value={editedContent}
         onChange={handleChange}
       />
@@ -203,6 +215,7 @@ const Details = (props) => {
           setDialog(null);
         }}
         onCancel={() => setDialog(null)}
+        autoFocus
       />
     );
   };
@@ -263,16 +276,17 @@ const Links = (props) => {
     );
   };
 
-  const handleDeleteLink = (title, url) => {
+  const handleDeleteLink = (linkIdx) => {
     setDialog(
       <ConfirmDialog
         title="Delete Link"
         content="Confirm?"
         onConfirm={() => {
-          removeLink(title, url);
+          removeLink(linkIdx);
           setDialog(null);
         }}
         onCancel={() => setDialog(null)}
+        autoFocus
       />
     );
   };
@@ -298,7 +312,7 @@ const Links = (props) => {
                         </Link>
                       </TableCell>
                       <TableCell align='center'>
-                        <IconButton onClick={() => handleDeleteLink(title, url)}>
+                        <IconButton onClick={() => handleDeleteLink(idx)}>
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
@@ -320,6 +334,115 @@ const Links = (props) => {
   );
 };
 
+const AnnotationsContainer = (props) => {
+  const {
+    annotations = [],
+    selectedAnnotationIdx,
+    annotating,
+    setAnnotating,
+    addAnnotation,
+    removeAnnotation,
+    saveAnnotationExplanation,
+    selectAnnotationIdx,
+  } = props;
+  
+  const selectedAnnotationExplanation = selectedAnnotationIdx == null ? "" : annotations[selectedAnnotationIdx].explanation;
+
+  const [dialog, setDialog] = useState();
+  const [editedExplanation, setEditedExplanation] = useState(selectedAnnotationExplanation);
+
+  const handleDeleteAnnotation = (annotationIdx) => {
+    setDialog(
+      <ConfirmDialog
+        title="Delete Annotation"
+        content="Confirm?"
+        onConfirm={() => {
+          removeAnnotation(annotationIdx);
+          setDialog(null);
+        }}
+        onCancel={() => setDialog(null)}
+        autoFocus
+      />
+    );
+  };
+
+  const handleSelectAnnotation = (annotationIdx) => {
+    if (selectedAnnotationIdx === annotationIdx) {
+      return;
+    }
+    selectAnnotationIdx(annotationIdx);
+    setEditedExplanation(annotations[annotationIdx].explanation);
+  };
+
+  const handleChange = (event) => setEditedExplanation(event.target.value);
+
+  const handleSave = () => saveAnnotationExplanation(editedExplanation);
+
+  const handleToggleAnnotate = () => setAnnotating(!annotating);
+
+  return (
+    <>
+      {
+        !_.isEmpty(annotations) && (
+          <Table>
+            <TableBody>
+              {
+                annotations.map((annotation, idx) => {
+                  const {
+                    sections,
+                    explanation,
+                  } = annotation;
+
+                  const explanationContainer = (idx === selectedAnnotationIdx)
+                    ? (
+                      <ClickAwayListener onClickAway={handleSave}>
+                        <AnnotationExplanationTextareaAutosize
+                          aria-label="explanation"
+                          value={editedExplanation}
+                          onChange={handleChange}
+                          maxRows={1}
+                        />
+                      </ClickAwayListener>
+                    )
+                    : (
+                      <Typography variant='body1'>
+                        {truncate(explanation || "[not set]", EXPLANATION_TRUNCATE_LENGTH)}
+                      </Typography>
+                    );
+                  
+                  return (
+                    <TableRow key={idx} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell align='center' onClick={() => handleSelectAnnotation(idx)}>
+                        {explanationContainer}
+                      </TableCell>
+                      <TableCell align='center'>
+                        <IconButton onClick={handleToggleAnnotate}>
+                          <AnnotateIcon />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell align='center'>
+                        <IconButton onClick={() => handleDeleteAnnotation(idx)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              }
+            </TableBody>
+          </Table>
+        )
+      }
+      <Button
+        onClick={addAnnotation}
+      >
+        Add Annotation
+      </Button>
+      {dialog}
+    </>
+  );
+};
+
 const EditPoemRenderer = (props) => {
   const {
     poem: {
@@ -332,18 +455,20 @@ const EditPoemRenderer = (props) => {
       content,
       details = [],
       context,
-      annotations,
+      annotations = [],
       links = [],
     },
     onUpdateTitle,
     onUpdateDetails,
     onUpdateLinks,
     onUpdateContent,
+    onUpdateAnnotations,
   } = props;
   
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingContent, setIsEditingContent] = useState(false);
-  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [isAnnotating, setIsAnnotating] = useState(false);
+  const [selectedAnnotationIdx, setSelectedAnnotationIdx] = useState(null);
 
   const titleContainer = !isEditingTitle
     ? (
@@ -401,11 +526,8 @@ const EditPoemRenderer = (props) => {
           url,
         },
       ])}
-      removeLink={(title, url) => {
-        console.log(`Removing link ${title} with url ${url}`);
-        const copy = [...links.filter((link) => link.title !== title || link.url !== url)];
-        console.log(copy);
-
+      removeLink={(idx) => {
+        const copy = [...links.filter((link, linkIdx) => linkIdx !== idx)];
         onUpdateLinks(copy);
       }}
     />
@@ -422,7 +544,43 @@ const EditPoemRenderer = (props) => {
     console.log(`Selected Line ${lineIdx} - Offset (${selectionStartIdx}, ${selectionEndIdx}): '${selectedText}'`);
   }
 
-  const notes = null;
+  const annotationsContainer = (
+    <AnnotationsContainer
+      annotations={annotations}
+      selectedAnnotationIdx={selectedAnnotationIdx}
+      annotating={isAnnotating}
+      setAnnotating={setIsAnnotating}
+      selectAnnotationIdx={(annotationIdx) => setSelectedAnnotationIdx(annotationIdx)}
+      addAnnotation={() => onUpdateAnnotations(
+        [...annotations, { explanation: "" }]
+      )}
+      removeAnnotation={(idx) => onUpdateAnnotations(
+        [...annotations.filter((annotation, annotationIdx) => annotationIdx !== idx)]
+      )}
+      saveAnnotation={(updatedAnnotation) => {
+        const copy = [...annotations];
+        copy[selectedAnnotationIdx] = updatedAnnotation;
+        onUpdateAnnotations(copy);
+      }}
+      saveAnnotationExplanation={(editedExplanation) => {
+        console.log(`Saving annotation ${selectedAnnotationIdx}`);
+        const selectedAnnotation = annotations[selectedAnnotationIdx];
+        if (selectedAnnotation.explanation === editedExplanation) {
+          setSelectedAnnotationIdx(null);
+          return;
+        }
+
+        const copy = [...annotations];
+        copy[selectedAnnotationIdx] = {
+          ...selectedAnnotation,
+          explanation: editedExplanation,
+        };
+
+        onUpdateAnnotations(copy);
+        setSelectedAnnotationIdx(null);
+      }}
+    />
+  );
 
   const contentContainer = 
     isEditingContent ? (
@@ -436,14 +594,12 @@ const EditPoemRenderer = (props) => {
           }}
         />
       )
-      : isEditingNotes
+      : isAnnotating
         ? (
-            <ContentEditor
-              onSave={(updatedContent) => {
-                onUpdateContent(updatedContent)
-                setIsEditingContent(false);
-              }}
-              onClose={() => setIsEditingContent(false)}
+            <TextView
+              content={content}
+              onSelectText={handleSelectText}
+              annotations={annotations}
             />
           )
         : (
@@ -461,7 +617,7 @@ const EditPoemRenderer = (props) => {
       info={infoContainer}
       details={detailsContainer}
       links={linksContainer}
-      notes={notes}
+      annotations={annotationsContainer}
       content={contentContainer}
     />
   );

@@ -41,7 +41,10 @@ const parseStructure = (content, annotations, selectedAnnotation) => {
   }
 
   for (const annotation of sortedAnnotations) {
-    for (const section of annotation.sections) {
+    const {
+      sections = [],
+    } = annotation;
+    for (const section of sections) {
       const unique = findDistinctSections(uniqueSections, section);
 
       unique.forEach((s) => {

@@ -129,3 +129,13 @@ export const updatePoemContent = async (userId, poemId, content) => {
     }
   );
 }
+
+export const updatePoemAnnotations = async (userId, poemId, annotations) => {
+  await db.update(
+    `Updating poem annotations for ${poemId}`,
+    db.paths().getPoem(poemId),
+    {
+      annotations,
+    }
+  );
+}
