@@ -249,7 +249,7 @@ const TextView = (props) => {
   }
 
   return (
-    <div onClick={onClick}>
+    <div onClick={onClick} style={{ width: '100%', padding: 8 }}>
       {elements}
     </div>
   );

@@ -56,10 +56,14 @@ const DescriptionSectionContent = (props) => {
   );
 }
 
-const AnnotationContainer = styled.div`
-  ${FLEX_COLUMN_CENTERED};
-  width: 20vw;
-`;
+const AnnotationContainer = styled.div(
+  ({ theme }) => `
+    ${FLEX_COLUMN_CENTERED};
+    width: 25vw;
+    padding: ${theme.spacing(1)};
+    margin: ${theme.spacing(1)};
+  `
+);
 
 const LeftPane = (props) => {
   const {

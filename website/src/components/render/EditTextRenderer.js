@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 
 import {
+  Backdrop,
   Button,
   ClickAwayListener,
   IconButton,
@@ -17,8 +18,11 @@ import {
   TableCell,
   TextareaAutosize,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
+
+import KeyEventHandler from 'components/utils/KeyEventHandler';
 
 import ConfirmDialog from 'components/dialogs/ConfirmDialog';
 import AddDetailDialog from 'components/dialogs/AddDetailDialog';
@@ -27,17 +31,21 @@ import ButtonControl from 'components/buttons/ButtonControl';
 import TextView from 'components/viewer/TextView';
 import ViewSkeleton from 'components/viewer/ViewSkeleton';
 
+import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AnnotateIcon from '@mui/icons-material/BorderColor';
+import ViewIcon from '@mui/icons-material/Search';
 
 import {
   MaxWidthDivRow,
+  DivColumn,
   PaperColumn,
   createTypographyTextareaAutosize,
 } from 'styles';
 
 import {
   truncate,
+  isDoubleClick,
 } from 'utils';
 
 const MAX_TITLE_FONT_REM = 4;
@@ -48,6 +56,8 @@ const DEFAULT_CONTENT_FONT_REM = 1.25;
 const DEBUG_TITLE_EDITOR = false;
 
 const EXPLANATION_TRUNCATE_LENGTH = 30;
+
+const ESCAPE_KEY_CODE = 27;
 
 function textComputedWidth(text, fontSizeRem) {
   return (text.length + 1) * (fontSizeRem);
@@ -90,6 +100,7 @@ const ContentEditor = (props) => {
         minRows={10}
         value={editedContent}
         onChange={handleChange}
+        style={{ padding: 8 }}
       />
     </ClickAwayListener>
   );
@@ -334,22 +345,112 @@ const Links = (props) => {
   );
 };
 
+const ContentContainer = (props) => {
+  const {
+    isEditingContent,
+    isAnnotating,
+    selectedAnnotationIdx,
+    content,
+    annotations,
+    onUpdateContent,
+    setIsEditingContent,
+    handleAnnotateTextSelection,
+    handleClickContent,
+  } = props;
+
+  let tooltipTitle;
+  let icon;
+  let iconButtonDisabled;
+  let innerContentContainer;
+
+  if (isEditingContent) {
+    tooltipTitle="Click to save, or click outside the content area";
+    icon = (<ViewIcon />);
+    iconButtonDisabled = false;
+    innerContentContainer = (
+      <ContentEditor
+        content={content}
+        onSave={(updatedContent) => {
+          if (content !== updatedContent) {
+            onUpdateContent(updatedContent)
+          }
+          setIsEditingContent(false);
+        }}
+      />
+    );
+  } else if (selectedAnnotationIdx != null) {
+    tooltipTitle = isAnnotating
+      ? "Disable annotating before editing content"
+      : "Click to edit content, or double click the content area";
+    icon = (<EditIcon />);
+    iconButtonDisabled = isAnnotating;
+    innerContentContainer = (
+      <TextView
+        content={content}
+        onSelectText={handleAnnotateTextSelection}
+        annotations={[annotations[selectedAnnotationIdx]]}
+      />
+    );
+  } else {
+    tooltipTitle = "Click to edit content, or double click the content area";
+    icon = (<EditIcon />);
+    iconButtonDisabled = false;
+    innerContentContainer = (
+      <TextView
+        content={content}
+        annotations={annotations}
+        onClick={handleClickContent}
+      />
+    );
+  }
+
+  return (
+    <div style={{ position: 'relative', width: '100%', padding: 8 }}>
+      <Tooltip title={tooltipTitle}>
+        <span
+          style={{
+            position: 'absolute',
+            top: 16,
+            right: 0,
+          }}
+        >
+          <IconButton
+            onClick={() => setIsEditingContent(true)}
+            disabled={iconButtonDisabled}
+          >
+            {icon}
+          </IconButton>
+        </span>
+      </Tooltip>
+      {innerContentContainer}
+    </div>
+  );
+}
+
 const AnnotationsContainer = (props) => {
   const {
     annotations = [],
     selectedAnnotationIdx,
-    annotating,
-    setAnnotating,
+    setSelectedAnnotationIdx,
+    isAnnotating,
+    setIsAnnotating,
     addAnnotation,
     removeAnnotation,
-    saveAnnotationExplanation,
-    selectAnnotationIdx,
+    saveAnnotation,
   } = props;
   
   const selectedAnnotationExplanation = selectedAnnotationIdx == null ? "" : annotations[selectedAnnotationIdx].explanation;
 
   const [dialog, setDialog] = useState();
+  const [editedAnnotationIdx, setEditedAnnotationIdx] = useState(null);
   const [editedExplanation, setEditedExplanation] = useState(selectedAnnotationExplanation);
+
+  const handleAddAnnotation = () => {
+    // First, save any outstanding edits
+    handleSave();
+
+    addAnnotation();
+  };
 
   const handleDeleteAnnotation = (annotationIdx) => {
     setDialog(
@@ -370,71 +471,129 @@ const AnnotationsContainer = (props) => {
     if (selectedAnnotationIdx === annotationIdx) {
       return;
     }
-    selectAnnotationIdx(annotationIdx);
-    setEditedExplanation(annotations[annotationIdx].explanation);
+    console.log(`Selecting annotations ${annotationIdx}`);
+    setIsAnnotating(false);
+    setSelectedAnnotationIdx(annotationIdx);    
   };
+
+  const handleEditExplanation = (annotationIdx) => {
+    setEditedAnnotationIdx(annotationIdx);
+    setEditedExplanation(annotations[annotationIdx].explanation);
+  }
 
   const handleChange = (event) => setEditedExplanation(event.target.value);
 
-  const handleSave = () => saveAnnotationExplanation(editedExplanation);
+  const handleSave = () => {
+    if (editedAnnotationIdx == null) {
+      return;
+    }
+    const updatedAnnotation = {
+      ...annotations[editedAnnotationIdx],
+      explanation: editedExplanation,
+    };
 
-  const handleToggleAnnotate = () => setAnnotating(!annotating);
+    saveAnnotation(editedAnnotationIdx, updatedAnnotation);
+    setEditedAnnotationIdx(null);
+  };
+
+  const handleToggleAnnotating = () => {
+    if (isAnnotating) {
+      console.log(`Disabling annotating`);
+    } else {
+      console.log(`Enabling annotating`);
+    }
+    setIsAnnotating(!isAnnotating)
+  };
+
+  const handleClickAwayAnnotationsContainer = () => {
+    if (isAnnotating) {
+      return;
+    }
+    handleSelectAnnotation(null);
+  };
 
   return (
     <>
       {
         !_.isEmpty(annotations) && (
-          <Table>
-            <TableBody>
-              {
-                annotations.map((annotation, idx) => {
-                  const {
-                    sections,
-                    explanation,
-                  } = annotation;
+          <ClickAwayListener onClickAway={handleClickAwayAnnotationsContainer}>
+            <Table>
+              <TableBody>
+                {
+                  annotations.map((annotation, idx) => {
+                    const {
+                      sections,
+                      explanation,
+                    } = annotation;
 
-                  const explanationContainer = (idx === selectedAnnotationIdx)
-                    ? (
-                      <ClickAwayListener onClickAway={handleSave}>
-                        <AnnotationExplanationTextareaAutosize
-                          aria-label="explanation"
-                          value={editedExplanation}
-                          onChange={handleChange}
-                          maxRows={1}
-                        />
-                      </ClickAwayListener>
-                    )
-                    : (
-                      <Typography variant='body1'>
-                        {truncate(explanation || "[not set]", EXPLANATION_TRUNCATE_LENGTH)}
-                      </Typography>
-                    );
-                  
-                  return (
-                    <TableRow key={idx} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell align='center' onClick={() => handleSelectAnnotation(idx)}>
-                        {explanationContainer}
-                      </TableCell>
-                      <TableCell align='center'>
-                        <IconButton onClick={handleToggleAnnotate}>
+                    const isSelected = idx === selectedAnnotationIdx;
+
+                    const numSections = _.size(sections);
+
+                    const explanationContainer = editedAnnotationIdx === idx
+                      ? (
+                        <ClickAwayListener onClickAway={handleSave}>
+                          <AnnotationExplanationTextareaAutosize
+                            aria-label="explanation"
+                            value={editedExplanation}
+                            onChange={handleChange}
+                            minRows={2}
+                          />
+                        </ClickAwayListener>
+                      )
+                      : (
+                        <Typography variant='body1'>
+                          {truncate(explanation || "[not set]", EXPLANATION_TRUNCATE_LENGTH)}
+                        </Typography>
+                      );
+
+                    const annotateIcon = isSelected && isAnnotating
+                      ? (
+                        <Tooltip title="Disable highlighter">
+                          <AnnotateIcon sx={{ color: 'red' }} />
+                        </Tooltip>
+                      )
+                      : (
+                        <Tooltip title="Toggle the highlighter to mark sections of text for this annotation.">
                           <AnnotateIcon />
-                        </IconButton>
-                      </TableCell>
-                      <TableCell align='center'>
-                        <IconButton onClick={() => handleDeleteAnnotation(idx)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              }
-            </TableBody>
-          </Table>
+                        </Tooltip>
+                      )
+                    
+                    return (
+                      <TableRow
+                        key={idx}
+                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        hover
+                        selected={isSelected}
+                        onClick={() => handleSelectAnnotation(idx)}
+                      >
+                        <TableCell align='center' onClick={() => handleEditExplanation(idx)} sx={{ width: '80%' }}>
+                          {explanationContainer}
+                        </TableCell>
+                        <TableCell align='center'>
+                          {`${numSections} highlighted regions`}
+                        </TableCell>
+                        <TableCell align='center'>
+                          <IconButton onClick={() => handleToggleAnnotating()}>
+                            {annotateIcon}
+                          </IconButton>
+                        </TableCell>
+                        <TableCell align='center'>
+                          <IconButton onClick={() => handleDeleteAnnotation(idx)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                }
+              </TableBody>
+            </Table>
+          </ClickAwayListener>
         )
       }
       <Button
-        onClick={addAnnotation}
+        onClick={handleAddAnnotation}
       >
         Add Annotation
       </Button>
@@ -467,8 +626,8 @@ const EditPoemRenderer = (props) => {
   
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingContent, setIsEditingContent] = useState(false);
-  const [isAnnotating, setIsAnnotating] = useState(false);
   const [selectedAnnotationIdx, setSelectedAnnotationIdx] = useState(null);
+  const [isAnnotating, setIsAnnotating] = useState(false);
 
   const titleContainer = !isEditingTitle
     ? (
@@ -533,83 +692,103 @@ const EditPoemRenderer = (props) => {
     />
   );
 
-  const handleSelectText = (selection) => {
+  const handleAnnotateTextSelection = (selection) => {
     const {
       lineIdx,
       selectionStartIdx,
       selectionEndIdx,
       selectedText,
     } = selection;
+
+    if (selectionStartIdx === selectionEndIdx) {
+      return;
+    }
     
     console.log(`Selected Line ${lineIdx} - Offset (${selectionStartIdx}, ${selectionEndIdx}): '${selectedText}'`);
+
+    const selectedAnnotation = annotations[selectedAnnotationIdx];
+    const {
+      sections = [],
+    } = selectedAnnotation;
+
+    const matchedSectionIdx = _.findIndex(sections, section => 
+      lineIdx === section[0]
+      && selectionStartIdx === section[1]
+      && selectionEndIdx === section[2]
+    );
+    
+    console.log(sections);
+    console.log(matchedSectionIdx);
+
+    let updatedSections;
+    
+    if (matchedSectionIdx === -1) {
+      // If no matched section, then add a new one
+      updatedSections = [
+        ...sections,
+        [
+          lineIdx,
+          selectionStartIdx,
+          selectionEndIdx,
+        ]
+      ];
+    } else {
+      // If a section did match, then remove it
+      updatedSections = [...sections.filter((section, idx) => idx !== matchedSectionIdx)];
+    }
+
+    const copy = [...annotations];
+    copy[selectedAnnotationIdx] = {
+      ...selectedAnnotation,
+      sections: updatedSections,
+    };
+    
+    onUpdateAnnotations(copy);
   }
+
+  const handleClickContent = (event) => {
+    if (isDoubleClick(event)) {
+      setIsEditingContent(true);
+    }
+  };
 
   const annotationsContainer = (
     <AnnotationsContainer
       annotations={annotations}
       selectedAnnotationIdx={selectedAnnotationIdx}
-      annotating={isAnnotating}
-      setAnnotating={setIsAnnotating}
-      selectAnnotationIdx={(annotationIdx) => setSelectedAnnotationIdx(annotationIdx)}
+      setSelectedAnnotationIdx={(annotationIdx) => setSelectedAnnotationIdx(annotationIdx)}
+      isAnnotating={isAnnotating}
+      setIsAnnotating={setIsAnnotating}
       addAnnotation={() => onUpdateAnnotations(
         [...annotations, { explanation: "" }]
       )}
-      removeAnnotation={(idx) => onUpdateAnnotations(
-        [...annotations.filter((annotation, annotationIdx) => annotationIdx !== idx)]
-      )}
-      saveAnnotation={(updatedAnnotation) => {
-        const copy = [...annotations];
-        copy[selectedAnnotationIdx] = updatedAnnotation;
-        onUpdateAnnotations(copy);
-      }}
-      saveAnnotationExplanation={(editedExplanation) => {
-        console.log(`Saving annotation ${selectedAnnotationIdx}`);
-        const selectedAnnotation = annotations[selectedAnnotationIdx];
-        if (selectedAnnotation.explanation === editedExplanation) {
-          setSelectedAnnotationIdx(null);
-          return;
-        }
-
-        const copy = [...annotations];
-        copy[selectedAnnotationIdx] = {
-          ...selectedAnnotation,
-          explanation: editedExplanation,
-        };
-
-        onUpdateAnnotations(copy);
+      removeAnnotation={(idx) => {
         setSelectedAnnotationIdx(null);
+        onUpdateAnnotations(
+          [...annotations.filter((annotation, annotationIdx) => annotationIdx !== idx)]
+        );
+      }}
+      saveAnnotation={(annotationIdx, updatedAnnotation) => {
+        const copy = [...annotations];
+        copy[annotationIdx] = updatedAnnotation;
+        onUpdateAnnotations(copy);
       }}
     />
   );
 
-  const contentContainer = 
-    isEditingContent ? (
-        <ContentEditor
-          content={content}
-          onSave={(updatedContent) => {
-            if (content !== updatedContent) {
-              onUpdateContent(updatedContent)
-            }
-            setIsEditingContent(false);
-          }}
-        />
-      )
-      : isAnnotating
-        ? (
-            <TextView
-              content={content}
-              onSelectText={handleSelectText}
-              annotations={annotations}
-            />
-          )
-        : (
-          <TextView
-            content={content}
-            onSelectText={handleSelectText}
-            annotations={[]}
-            onClick={() => setIsEditingContent(true)}
-          />
-        );
+  const contentContainer = (
+    <ContentContainer
+      isEditingContent={isEditingContent}
+      isAnnotating={isAnnotating}
+      selectedAnnotationIdx={selectedAnnotationIdx}
+      content={content}
+      annotations={annotations}
+      onUpdateContent={onUpdateContent}
+      setIsEditingContent={setIsEditingContent}
+      handleAnnotateTextSelection={handleAnnotateTextSelection}
+      handleClickContent={handleClickContent}
+    />
+  );
 
   return (
     <ViewSkeleton

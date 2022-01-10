@@ -20,7 +20,6 @@ const ValueForm = (props) => {
   const {
     detailKey,
     onChange,
-    onEnter = () => {},
   } = props;
 
   if (detailKey == null) {
@@ -56,6 +55,8 @@ const ValueForm = (props) => {
           onChange={(event, value) => onChange(value)}
         />
       );
+    default:
+      throw Error(`Unsupported poem detail type ${type}`);
   }
 }
 
